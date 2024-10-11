@@ -19,8 +19,7 @@ class LoginView extends GetView<LoginController> {
             Center(
               child: Column(
                 children: [
-                  Image.asset('assets/LOGO.png',
-                      height: 100), // Adjust the path if needed
+                  Image.asset('assets/LOGO.png', height: 100), // Adjust the path if needed
                   SizedBox(height: 30),
 
                   // App Name
@@ -103,6 +102,26 @@ class LoginView extends GetView<LoginController> {
               ),
               child: Text(
                 'Login',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+
+            SizedBox(height: 20),
+
+            // Admin Login Button
+            ElevatedButton(
+              onPressed: () {
+                //Get.toNamed(Routes.ADMIN); // Pastikan ada route untuk admin
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[800], // Warna tombol berbeda untuk admin
+                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+              ),
+              child: Text(
+                'Admin Login',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.white,
