@@ -1,4 +1,11 @@
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/detail_bubuk/bindings/detail_bubuk_binding.dart';
+import 'package:myapp/app/modules/detail_bubuk/views/detail_bubuk_view.dart';
+import 'package:myapp/app/modules/minuman_saji/bindings/produk_detail_binding.dart';
+import 'package:myapp/app/modules/minuman_saji/views/produk_detail_view.dart';
+import 'package:myapp/app/modules/stock/bindings/stock_binding.dart';
+import 'package:myapp/app/modules/stock/views/coffe_powder_view.dart';
+import 'package:myapp/app/modules/stock/views/stock_coffee.dart';
 
 import '../modules/cart/bindings/cart_binding.dart';
 import '../modules/cart/views/cart_view.dart';
@@ -50,6 +57,21 @@ class AppPages {
       name: _Paths.SIGNUP,
       page: () => SignupView(),
       binding: SignupBinding(),
+    ),
+    GetPage(
+      name: _Paths.DETAILBUBUK,
+      page: () => detail_bubuk_view(),
+      binding: detailbubukbinding(),
+    ),
+    GetPage(
+      name: _Paths.MINUMANSAJI,
+      page: () => ProductDetailView(),
+      binding: ProductDetailBinding(),
+    ),
+    GetPage(
+      name: _Paths.STOCK,
+      page: () => stockcoffeeview(),
+      binding: stockbinding(),
     ),
   ];
 }

@@ -199,7 +199,7 @@ class HomeView extends StatelessWidget {
                             backgroundColor: Color(0xFF495048),
                           ),
                           onPressed: () {
-                            Get.toNamed(menu.route); // Rute yang berbeda untuk setiap menu
+                            Get.toNamed(Routes.MINUMANSAJI); // Rute yang berbeda untuk setiap menu
                           },
                           child: Icon(Icons.arrow_forward, color: Colors.white),
                         ),

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/app/modules/home/views/coffe_powder_view.dart';
+import '../views/coffe_powder_view.dart';
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
 // Import the new view
 
 
 
-class HomeView extends StatelessWidget {
+class stockcoffeeview extends StatelessWidget {
   final HomeController controller = Get.find();
 
   @override
@@ -189,7 +189,7 @@ class HomeView extends StatelessWidget {
           // Logika untuk berpindah tampilan jika diperlukan
           if (index == 0) {
             // Jika Home dipilih
-            Get.to(HomeView());
+            Get.to(stockcoffeeview());
           } else if (index == 1) {
             // Jika Cart dipilih, navigasikan ke tampilan Cart yang harus dibuat
             // Get.to(CartView()); // Uncomment ini jika Anda sudah membuat CartView

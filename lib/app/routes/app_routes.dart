@@ -9,6 +9,10 @@ abstract class Routes {
   static const LANDING_PAGE = _Paths.LANDING_PAGE;
   static const LOGIN = _Paths.LOGIN;
   static const SIGNUP = _Paths.SIGNUP;
+  static const StockCoffee = _Paths.StockCoffee;
+  static const DETAILBUBUK = _Paths.DETAILBUBUK;
+  static const MINUMANSAJI = _Paths.MINUMANSAJI;
+  static const STOCK = _Paths.STOCK;
 }
 
 abstract class _Paths {
@@ -19,4 +23,8 @@ abstract class _Paths {
   static const LANDING_PAGE = '/landing-page';
   static const LOGIN = '/login';
   static const SIGNUP = '/signup';
+  static const StockCoffee = '/stock_coffee';
+  static const DETAILBUBUK = '/detail_bubuk';
+  static const MINUMANSAJI = '/minuman_saji';
+  static const STOCK = '/stock';
 }

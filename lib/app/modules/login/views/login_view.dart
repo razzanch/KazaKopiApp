@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
 import 'package:myapp/app/routes/app_pages.dart';
-
 import '../controllers/login_controller.dart';
 
 class LoginView extends GetView<LoginController> {
@@ -114,7 +112,7 @@ class LoginView extends GetView<LoginController> {
             // Admin Login Button
             ElevatedButton(
               onPressed: () {
-                //Get.toNamed(Routes.ADMIN); // Pastikan ada route untuk admin
+                Get.toNamed(Routes.STOCK); // Pastikan ada route untuk admin
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red[800], // Warna tombol berbeda untuk admin
