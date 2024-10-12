@@ -113,7 +113,7 @@ class CoffeePowderView extends StatelessWidget {
                   height: screenHeight * 0.25, // 25% dari tinggi layar
                   width: double.infinity,
                   child: Image.asset(
-                    'assets/images/special.png', // Mengganti special_offer.png dengan special.png
+                    'assets/News3.png', // Mengganti special_offer.png dengan special.png
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -195,9 +195,9 @@ class CoffeePowderView extends StatelessWidget {
                     NeverScrollableScrollPhysics(), // Menghilangkan scroll GridView
                 children: [
                   buildCoffeeCard(
-                      'Robusta', 'Tersedia', 'assets/images/11.png'),
+                      'Robusta', 'Tersedia', 'assets/Bk1.png'),
                   buildCoffeeCard(
-                      'Arabic', 'Tersedia', 'assets/images/4.1.png'),
+                      'Arabic', 'Tersedia', 'assets/BK4.png'),
                 ],
               ),
               SizedBox(height: 16), // Menambahkan ruang di bawah grid
