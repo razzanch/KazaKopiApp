@@ -113,7 +113,7 @@ class HomeView extends StatelessWidget {
                   height: screenHeight * 0.25, // 25% dari tinggi layar
                   width: double.infinity,
                   child: Image.asset(
-                    'assets/images/special.png', // Mengganti special_offer.png dengan special.png
+                    'assets/News3.png', // Mengganti special_offer.png dengan special.png
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -191,12 +191,12 @@ class HomeView extends StatelessWidget {
                     NeverScrollableScrollPhysics(), // Menghilangkan scroll GridView
                 children: [
                   buildCoffeeCard(
-                      'Kopi Susu Regular', 'Tersedia', 'assets/images/1.png'),
+                      'Kopi Susu Regular', 'Tersedia', 'assets/M1.png'),
                   buildCoffeeCard(
-                      'Kopi Susu Gula Aren', 'Tersedia', 'assets/images/2.png'),
+                      'Kopi Susu Gula Aren', 'Tersedia', 'assets/M2.png'),
                   buildCoffeeCard(
-                      'Creamy Signature', 'Tersedia', 'assets/images/3.png'),
-                  buildCoffeeCard('Chocolate', 'Habis', 'assets/images/4.png'),
+                      'Creamy Signature', 'Tersedia', 'assets/M3.png'),
+                  buildCoffeeCard('Chocolate', 'Habis', 'assets/M4.png'),
                 ],
               ),
               SizedBox(height: 16), // Menambahkan ruang di bawah grid
