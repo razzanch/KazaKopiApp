@@ -5,27 +5,27 @@ class HomeView extends StatelessWidget {
     {
       'title': 'Kopi Susu Reguler',
       'date': '24 September 2024',
-      'image': 'assets/images/1.png',
+      'image': 'assets/M1.png',
     },
     {
       'title': 'Kopi Susu Gula Aren',
       'date': '23 September 2024',
-      'image': 'assets/images/2.png',
+      'image': 'assets/M2.png',
     },
     {
       'title': 'Arabic Fine Prager',
       'date': '22 September 2024',
-      'image': 'assets/images/3.png',
+      'image': 'assets/M3.png',
     },
     {
       'title': 'Kopi Susu Reguler',
       'date': '22 September 2024',
-      'image': 'assets/images/4.png',
+      'image': 'assets/M4.png',
     },
     {
       'title': 'Kopi Susu Gula Aren',
       'date': '21 September 2024',
-      'image': 'assets/images/1.png',
+      'image': 'assets/M1.png',
     },
   ];
 
