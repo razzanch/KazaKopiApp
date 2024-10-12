@@ -9,22 +9,22 @@ class CoffeeMenu {
       {required this.name, required this.imagePath, required this.rating});
 }
 
-class HomeController extends GetxController {
+class detail_bubuk_controller extends GetxController {
   final coffeeMenus = <CoffeeMenu>[
     CoffeeMenu(
         name: 'Robusta Dampit Fine Medium',
-        imagePath: 'assets/1.png',
+        imagePath: 'assets/BK1.png',
         rating: 4.8),
     CoffeeMenu(
         name: 'Robusta Dampit Dark Profile',
-        imagePath: 'assets/2.png',
+        imagePath: 'assets/BK2.png',
         rating: 4.8),
     CoffeeMenu(
         name: "Robusta Dampit Super Dark Profile",
-        imagePath: 'assets/3.png',
+        imagePath: 'assets/BK3.png',
         rating: 4.2),
     CoffeeMenu(
-        name: "Robusta Gunung Kawi", imagePath: 'assets/4.png', rating: 4.9)
+        name: "Robusta Gunung Kawi", imagePath: 'assets/BK4.png', rating: 4.9)
     // Add more coffee menus here
   ].obs;
 

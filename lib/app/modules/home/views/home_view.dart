@@ -5,7 +5,8 @@ import '../controllers/home_controller.dart';
 
 class HomeView extends StatelessWidget {
   final HomeController controller = Get.put(HomeController());
-  final PageController pageController = PageController(); // PageController untuk mengontrol scroll position
+  final PageController pageController =
+      PageController(); // PageController untuk mengontrol scroll position
 
   @override
   Widget build(BuildContext context) {
@@ -19,25 +20,31 @@ class HomeView extends StatelessWidget {
           children: [
             Text(
               "Location",
-              style: TextStyle(fontSize: 14, color: Colors.white70, height: 0.8), // Mengurangi line-height
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white70,
+                  height: 0.8), // Mengurangi line-height
             ),
             Obx(() => DropdownButton<String>(
-              value: controller.selectedLocation.value,
-              dropdownColor: Colors.teal,
-              icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-              underline: SizedBox(),
-              isDense: true, // Memperpendek jarak dropdown
-              onChanged: (newLocation) {
-                controller.selectedLocation.value = newLocation!;
-              },
-              items: controller.locations.map((location) {
-                return DropdownMenuItem<String>(
-                  value: location,
-                  child: Text(location),
-                );
-              }).toList(),
-            )),
+                  value: controller.selectedLocation.value,
+                  dropdownColor: Colors.teal,
+                  icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                  underline: SizedBox(),
+                  isDense: true, // Memperpendek jarak dropdown
+                  onChanged: (newLocation) {
+                    controller.selectedLocation.value = newLocation!;
+                  },
+                  items: controller.locations.map((location) {
+                    return DropdownMenuItem<String>(
+                      value: location,
+                      child: Text(location),
+                    );
+                  }).toList(),
+                )),
           ],
         ),
         actions: [
@@ -47,7 +54,6 @@ class HomeView extends StatelessWidget {
           ),
         ],
       ),
-
       body: Column(
         children: [
           // Search Bar
@@ -90,20 +96,22 @@ class HomeView extends StatelessWidget {
                 // Page indicator
                 SizedBox(height: 8),
                 Obx(() => Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(3, (index) {
-                    return Container(
-                      margin: EdgeInsets.symmetric(horizontal: 4),
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: controller.currentPage.value == index ? Colors.teal : Colors.grey,
-                        border: Border.all(color: Colors.grey),
-                      ),
-                    );
-                  }),
-                )),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(3, (index) {
+                        return Container(
+                          margin: EdgeInsets.symmetric(horizontal: 4),
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: controller.currentPage.value == index
+                                ? Colors.teal
+                                : Colors.grey,
+                            border: Border.all(color: Colors.grey),
+                          ),
+                        );
+                      }),
+                    )),
               ],
             ),
           ),
@@ -116,46 +124,50 @@ class HomeView extends StatelessWidget {
                 GestureDetector(
                   onTap: () => controller.isMinumanSelected.value = true,
                   child: Obx(() => Column(
-                    children: [
-                      Text(
-                        "Minuman",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: controller.isMinumanSelected.value ? Colors.black : Colors.grey,
-                        ),
-                      ),
-                      if (controller.isMinumanSelected.value)
-                        Container(
-                          margin: EdgeInsets.only(top: 4),
-                          height: 2,
-                          width: 60,
-                          color: Colors.teal,
-                        ),
-                    ],
-                  )),
+                        children: [
+                          Text(
+                            "Minuman",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: controller.isMinumanSelected.value
+                                  ? Colors.black
+                                  : Colors.grey,
+                            ),
+                          ),
+                          if (controller.isMinumanSelected.value)
+                            Container(
+                              margin: EdgeInsets.only(top: 4),
+                              height: 2,
+                              width: 60,
+                              color: Colors.teal,
+                            ),
+                        ],
+                      )),
                 ),
                 GestureDetector(
                   onTap: () => controller.isMinumanSelected.value = false,
                   child: Obx(() => Column(
-                    children: [
-                      Text(
-                        "Bubuk Kopi",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: !controller.isMinumanSelected.value ? Colors.black : Colors.grey,
-                        ),
-                      ),
-                      if (!controller.isMinumanSelected.value)
-                        Container(
-                          margin: EdgeInsets.only(top: 4),
-                          height: 2,
-                          width: 60,
-                          color: Colors.teal,
-                        ),
-                    ],
-                  )),
+                        children: [
+                          Text(
+                            "Bubuk Kopi",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: !controller.isMinumanSelected.value
+                                  ? Colors.black
+                                  : Colors.grey,
+                            ),
+                          ),
+                          if (!controller.isMinumanSelected.value)
+                            Container(
+                              margin: EdgeInsets.only(top: 4),
+                              height: 2,
+                              width: 60,
+                              color: Colors.teal,
+                            ),
+                        ],
+                      )),
                 ),
               ],
             ),
@@ -199,7 +211,14 @@ class HomeView extends StatelessWidget {
                             backgroundColor: Color(0xFF495048),
                           ),
                           onPressed: () {
-                            Get.toNamed(Routes.MINUMANSAJI); // Rute yang berbeda untuk setiap menu
+                            // Periksa apakah tab Minuman atau Bubuk Kopi yang aktif
+                            if (controller.isMinumanSelected.value) {
+                              Get.toNamed(
+                                  Routes.MINUMANSAJI); // Rute ke MinumanSaji
+                            } else {
+                              Get.toNamed(
+                                  Routes.DETAILBUBUK); // Rute ke BubukKopi
+                            }
                           },
                           child: Icon(Icons.arrow_forward, color: Colors.white),
                         ),
@@ -236,7 +255,8 @@ class HomeView extends StatelessWidget {
                       builder: (BuildContext context) {
                         return AlertDialog(
                           title: const Text('Warning'),
-                          content: const Text('Anda sudah berada di halaman home'),
+                          content:
+                              const Text('Anda sudah berada di halaman home'),
                           actions: <Widget>[
                             TextButton(
                               onPressed: () {

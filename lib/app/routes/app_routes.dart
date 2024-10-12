@@ -28,3 +28,9 @@ abstract class _Paths {
   static const MINUMANSAJI = '/minuman_saji';
   static const STOCK = '/stock';
 }
+
+List<GetPage> getPages = [
+  GetPage(name: Routes.HOME, page: () => HomeView()),
+  GetPage(name: Routes.DETAILBUBUK, page: () => detail_bubuk_view()),
+  GetPage(name: Routes.MINUMANSAJI, page: () => ProductDetailView()),
+];

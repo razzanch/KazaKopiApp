@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/routes/app_pages.dart';
-import '../controllers/home_controller.dart';
+import '../controllers/detail_bubuk_controller.dart';
 
-class detail_bubuk_view extends GetView<HomeController> {
+class detail_bubuk_view extends GetView<detail_bubuk_controller> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +22,7 @@ class detail_bubuk_view extends GetView<HomeController> {
             child: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () {
-                Get.toNamed(Routes.HOME);// Back logic
+                Get.toNamed(Routes.HOME); // Back logic
               },
             ),
           ),
