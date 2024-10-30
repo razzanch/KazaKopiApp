@@ -34,22 +34,7 @@ class SignUpController extends GetxController {
     }
   }
 
-  // Fungsi untuk login pengguna
-  Future<void> loginUser(String email, String password) async {
-    try {
-      isLoading.value = true;
-      await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      Get.snackbar('Success', 'Login successful', backgroundColor: Colors.green);
-      Get.off(HomeView()); // Navigasi ke HomeView setelah login berhasil
-    } catch (error) {
-      Get.snackbar('Error', 'Login failed: $error', backgroundColor: Colors.red);
-    } finally {
-      isLoading.value = false;
-    }
-  }
+
 
   // Fungsi untuk logout
   void logout() async {

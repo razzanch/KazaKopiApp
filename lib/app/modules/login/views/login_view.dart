@@ -1,14 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 import '../controllers/login_controller.dart';
 
 class LoginView extends GetView<LoginController> {
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  LoginView() {
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> showNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'login_channel',
+      'Login Notifications',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(0, 'Login Berhasil', 'Selamat datang kembali di Kaza Kopi Nusantara!', platformChannelSpecifics);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView( // Wrap with SingleChildScrollView
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -17,9 +37,8 @@ class LoginView extends GetView<LoginController> {
             Center(
               child: Column(
                 children: [
-                  Image.asset('assets/LOGO.png', height: 100), // Adjust the path if needed
+                  Image.asset('assets/LOGO.png', height: 100),
                   SizedBox(height: 30),
-
                   // App Name
                   Text(
                     "Kaza Kopi Nusantara",
@@ -30,7 +49,6 @@ class LoginView extends GetView<LoginController> {
                     ),
                   ),
                   SizedBox(height: 10),
-
                   // Login Text
                   Text(
                     "Login to your account",
@@ -79,7 +97,9 @@ class LoginView extends GetView<LoginController> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Tambahkan logika untuk mengatur ulang password
+                },
                 child: Text(
                   'Forgot Password?',
                   style: TextStyle(
@@ -92,30 +112,33 @@ class LoginView extends GetView<LoginController> {
             SizedBox(height: 20),
 
             // Login Button
-            ElevatedButton(
-              onPressed: () {
-                String email = controller.emailController.text;
-                String password = controller.passwordController.text;
+            Obx(() => ElevatedButton(
+              onPressed: controller.isLoading.value
+                  ? null // Disable button saat loading
+                  : () async {
+                      String email = controller.emailController.text;
+                      String password = controller.passwordController.text;
 
-                // Check if the user is admin
-                if (email == 'admin' && password == 'admin') {
-                  Get.toNamed(Routes.STOCK); // Redirect to Admin route
-                } else {
-                  Get.toNamed(Routes.HOME); // Redirect to User route
-                }
-              },
+                      // Panggil fungsi login dari controller
+                      await controller.loginUser(email, password);
+                      if (controller.isLoading.value == false) {
+                        await showNotification(); // Tampilkan notifikasi setelah login berhasil
+                      }
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey[800], // Button color
                 padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               ),
-              child: Text(
-                'Login',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+              child: controller.isLoading.value
+                  ? CircularProgressIndicator(color: Colors.white)
+                  : Text(
+                      'Login',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+            )),
 
             SizedBox(height: 20),
 
