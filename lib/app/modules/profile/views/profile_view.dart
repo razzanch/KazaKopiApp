@@ -90,17 +90,7 @@ class _ProfileViewState extends State<ProfileView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            color: Colors.red, // Set the icon color to red
-            onPressed: () {
-              Get.toNamed(Routes.LOGIN);
-            },
-            tooltip: 'Logout', // Tooltip for the button
-          ),
-        ],
+        title: Text('Update Account'),
         backgroundColor: Colors.white, // Set AppBar background color
         elevation: 0,
         leading: Padding(
@@ -111,7 +101,7 @@ class _ProfileViewState extends State<ProfileView> {
               icon:
                   Icon(Icons.arrow_back, color: Colors.white), // Tombol kembali
               onPressed: () {
-                Navigator.pop(context); // Kembali ke halaman sebelumnya
+                Get.toNamed(Routes.MAINPROFILE); // Kembali ke halaman sebelumnya
               },
             ),
           ),

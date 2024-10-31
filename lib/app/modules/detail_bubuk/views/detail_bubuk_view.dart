@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 import '../controllers/detail_bubuk_controller.dart';
 
-
 class DetailBubukView extends GetView<DetailBubukController> {
   @override
   Widget build(BuildContext context) {
@@ -73,8 +72,7 @@ class DetailBubukView extends GetView<DetailBubukController> {
                             Expanded(
                               child: Text(
                                 controller
-                                    .coffeeMenus[
-                                        controller.currentMenuIndex.value]
+                                    .coffeeMenus[controller.currentMenuIndex.value]
                                     .name,
                                 style: TextStyle(
                                   fontSize: 22,
@@ -185,6 +183,7 @@ class DetailBubukView extends GetView<DetailBubukController> {
                                 ),
                               ],
                             )),
+
                       ),
                     ],
                   ),
@@ -205,6 +204,8 @@ class DetailBubukView extends GetView<DetailBubukController> {
                       child: TextButton(
                         onPressed: () {
                           // Add to cart logic
+                          ; // Call your addToCart method
+                          Get.toNamed(Routes.CART); // Navigate to the Cart page
                         },
                         child: Text(
                           "Add to Cart",

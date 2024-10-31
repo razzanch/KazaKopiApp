@@ -37,6 +37,10 @@ dependencies:
   cupertino_icons: ^1.0.6
   get: ^4.6.6
   image_picker:
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  flutter_local_notifications: ^17.2.4
+  cloud_firestore: ^5.4.4
 
 dev_dependencies:
   flutter_test:
@@ -96,6 +100,11 @@ flutter:
   - assets/M2.png
   - assets/M3.png
   - assets/M4.png
+  - assets/TIRAIBG.png
+  - assets/HC.png
+  - assets/MyFav.png
+  - assets/MyOrder.png
+  - assets/OurIG.png
 
 
 

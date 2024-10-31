@@ -1,14 +1,27 @@
+buildscript {
+    repositories {
+        google() // Menambahkan repositori Google
+        mavenCentral() // Menambahkan repositori Maven Central
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:7.3.1" // Versi Gradle Plugin
+        classpath 'com.google.gms:google-services:4.3.10' // Dependensi Google Services
+    }
+}
+
 allprojects {
     repositories {
-        google()
-        mavenCentral()
+        google() // Menambahkan repositori Google
+        mavenCentral() // Menambahkan repositori Maven Central
     }
 }
 
 rootProject.buildDir = "../build"
+
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
+
 subprojects {
     project.evaluationDependsOn(":app")
 }

@@ -8,30 +8,27 @@ class DetailMinumanView extends GetView<DetailMinumanController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-  title: Text(
-    'Coffee Menu',
-    style: TextStyle(color: Colors.white), // Ubah warna teks menjadi putih
-  ),
-  backgroundColor: Colors.teal,
-  leading: IconButton(
-    icon: Icon(Icons.arrow_back, color: Colors.white), // Ikon tombol back
-    onPressed: () {
-      Get.toNamed(Routes.HOME); // Mengarahkan ke Routes.HOME
-    },
-  ),
-  actions: [
-    IconButton(
-      icon: Icon(Icons.favorite, color: Colors.red),
-      onPressed: () {
-        Get.toNamed(Routes.HOME); // Mengarahkan ke Routes.HOME
-      },
-    ),
-  ],
-),
-
-
+        title: Text(
+          'Coffee Menu',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.teal,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Get.toNamed(Routes.HOME);
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.favorite, color: Colors.red),
+            onPressed: () {
+              Get.toNamed(Routes.HOME);
+            },
+          ),
+        ],
+      ),
       body: Obx(() {
-        // Cek apakah kita di detail atau daftar produk
         if (controller.product.value == null) {
           return ListView.builder(
             itemCount: controller.products.length,
@@ -43,7 +40,6 @@ class DetailMinumanView extends GetView<DetailMinumanController> {
                 subtitle: Text('RP ${product.price.toStringAsFixed(0)}'),
                 trailing: Icon(Icons.arrow_forward_ios),
                 onTap: () {
-                  // Set produk yang dipilih dan navigasi ke detail
                   controller.product.value = product;
                 },
               );
@@ -51,7 +47,6 @@ class DetailMinumanView extends GetView<DetailMinumanController> {
           );
         }
 
-        // Jika produk tidak null, tampilkan detail produk
         final product = controller.product.value!;
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -78,10 +73,10 @@ class DetailMinumanView extends GetView<DetailMinumanController> {
                           },
                           child: Text(
                             'Previous',
-                            style: TextStyle(color: Colors.white), // Ubah warna teks menjadi putih
+                            style: TextStyle(color: Colors.white),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal, // Ubah warna latar belakang menjadi teal
+                            backgroundColor: Colors.teal,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -108,10 +103,10 @@ class DetailMinumanView extends GetView<DetailMinumanController> {
                           },
                           child: Text(
                             'Next',
-                            style: TextStyle(color: Colors.white), // Ubah warna teks menjadi putih
+                            style: TextStyle(color: Colors.white),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal, // Ubah warna latar belakang menjadi teal
+                            backgroundColor: Colors.teal,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -192,9 +187,9 @@ class DetailMinumanView extends GetView<DetailMinumanController> {
               Text(
                 product.description,
                 style: TextStyle(fontSize: 16, color: Colors.black54),
-                textAlign: TextAlign.justify, // Menyusun teks dengan rata kanan dan kiri
+                textAlign: TextAlign.justify,
               ),
-              SizedBox(height: 20), // Spasi untuk estetika
+              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -209,7 +204,10 @@ class DetailMinumanView extends GetView<DetailMinumanController> {
                   Container(
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: controller.addToCart,
+                      onPressed: () {
+                        controller.addToCart(); // Optional: You can keep this line if you want to retain the cart functionality
+                        Get.toNamed(Routes.CART); // Navigate to the Cart page
+                      },
                       child: Text(
                         'Add to Cart',
                         style: TextStyle(

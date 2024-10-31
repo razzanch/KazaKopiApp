@@ -219,73 +219,83 @@ class HomeView extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: Container(
-        height: 50,
-        color: const Color.fromARGB(255, 255, 255, 255),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFF495048),
-                  ),
-                  width: 50,
-                  height: 50,
-                ),
-                IconButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Warning'),
-                          content: const Text('Anda sudah berada di halaman home'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Get.back(); // Menutup dialog
-                              },
-                              child: const Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  icon: Icon(
-                    Icons.home,
-                    color: Colors.white,
-                  ),
-                  tooltip: 'Home',
-                ),
-              ],
+  height: 50,
+  color: const Color.fromARGB(255, 255, 255, 255),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceAround,
+    children: [
+      Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xFF495048),
             ),
-            IconButton(
-              onPressed: () {
-                Get.toNamed(Routes.CART); // Rute ke Cart
-              },
-              icon: Icon(
-                Icons.shopping_cart,
-                color: Colors.grey,
-              ),
-              tooltip: 'Cart',
+            width: 50,
+            height: 50,
+          ),
+          IconButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Warning'),
+                    content: const Text('Anda sudah berada di halaman home'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Get.back(); // Menutup dialog
+                        },
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            icon: Icon(
+              Icons.home,
+              color: Colors.white,
             ),
-            IconButton(
-              onPressed: () {
-                Get.toNamed(Routes.PROFILE); // Rute ke Profil
-              },
-              icon: Icon(
-                Icons.person,
-                color: Colors.grey,
-              ),
-              tooltip: 'Profil',
-            ),
-          ],
-        ),
+            tooltip: 'Home',
+          ),
+        ],
       ),
+      IconButton(
+        onPressed: () {
+          Get.toNamed(Routes.CART); // Rute ke Cart
+        },
+        icon: Icon(
+          Icons.shopping_cart,
+          color: Colors.grey,
+        ),
+        tooltip: 'Cart',
+      ),
+      IconButton(
+        onPressed: () {
+          // Kosongkan logika onPressed untuk ikon News
+        },
+        icon: Icon(
+          Icons.article, // Gunakan ikon yang cocok untuk News
+          color: Colors.grey,
+        ),
+        tooltip: 'News',
+      ),
+      IconButton(
+        onPressed: () {
+          Get.toNamed(Routes.MAINPROFILE); // Rute ke Profil
+        },
+        icon: Icon(
+          Icons.person,
+          color: Colors.grey,
+        ),
+        tooltip: 'Profil',
+      ),
+    ],
+  ),
+),
     );
   }
 }

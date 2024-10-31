@@ -14,6 +14,13 @@ abstract class Routes {
   static const STOCK = _Paths.STOCK;
   static const COFFE_POWDER = _Paths.COFFE_POWDER;
   static const ORDER = _Paths.ORDER;
+  static const MAINPROFILE = _Paths.MAINPROFILE;
+  static const HELPCENTER = _Paths.HELPCENTER;
+  static const MYFAV = _Paths.MYFAV;
+  static const MYORDER = _Paths.MYORDER;
+  static const OURIG = _Paths.OURIG;
+  static const RESETPW = _Paths.RESETPW;
+  static const DELETEACC = _Paths.DELETEACC;
 }
 
 abstract class _Paths {
@@ -29,4 +36,11 @@ abstract class _Paths {
   static const STOCK = '/stock';
   static const COFFE_POWDER = '/coffe-powder';
   static const ORDER = '/order';
+  static const MAINPROFILE = '/mainprofile';
+  static const HELPCENTER = '/helpcenter';
+  static const MYFAV = '/myfav';
+  static const MYORDER = '/myorder';
+  static const OURIG = '/ourig';
+  static const RESETPW = '/resetpw';
+  static const DELETEACC = '/deleteacc';
 }

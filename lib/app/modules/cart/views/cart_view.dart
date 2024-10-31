@@ -141,79 +141,88 @@ class _CartViewState extends State<CartView> {
         ),
       ),
       bottomNavigationBar: Container(
-        height: 50,
-        color: const Color.fromARGB(255, 255, 255, 255),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            // Icon Home
-            IconButton(
-              padding: EdgeInsets.only(left: 60, right: 60),
-              onPressed: () {
-                Get.toNamed(Routes.HOME); // Ubah sesuai rute yang Anda gunakan
-              },
-              icon: Icon(
-                Icons.home,
-                color: Colors.grey,
-              ),
-              tooltip: 'Home',
-            ),
-            // Container with the gray circle over the Cart icon
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFF495048), // Warna highlight abu-abu
-                  ),
-                  width: 50, // Diameter of the circle
-                  height: 50,
-                ),
-                IconButton(
-                  padding: EdgeInsets.all(0), // Remove extra padding
-                  onPressed: () {
-                     showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Warning'),
-                        content: const Text('Anda sudah berada di halaman cart'),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () {
-                              Get.back(); // Menutup dialog
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                  },
-                  icon: Icon(
-                    Icons.shopping_cart,
-                    color: Colors.white, // Change icon color to white
-                  ),
-                  tooltip: 'Cart',
-                ),
-              ],
-            ),
-            // Icon Profile
-            IconButton(
-              padding: EdgeInsets.only(left: 60, right: 60),
-              onPressed: () {
-                Get.toNamed(Routes.PROFILE);
-              },
-              icon: Icon(
-                Icons.person,
-                color: Colors.grey,
-              ),
-              tooltip: 'Profil',
-            ),
-          ],
+  height: 50,
+  color: const Color.fromARGB(255, 255, 255, 255),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      // Icon Home
+      IconButton(
+        onPressed: () {
+          Get.toNamed(Routes.HOME); // Ubah sesuai rute yang Anda gunakan
+        },
+        icon: Icon(
+          Icons.home,
+          color: Colors.grey,
         ),
+        tooltip: 'Home',
       ),
+      // Container with the gray circle over the Cart icon
+      Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xFF495048), // Warna highlight abu-abu
+            ),
+            width: 50, // Diameter of the circle
+            height: 50,
+          ),
+          IconButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Warning'),
+                    content: const Text('Anda sudah berada di halaman cart'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Get.back(); // Menutup dialog
+                        },
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            icon: Icon(
+              Icons.shopping_cart,
+              color: Colors.white, // Change icon color to white
+            ),
+            tooltip: 'Cart',
+          ),
+        ],
+      ),
+      // Icon News (new icon with empty onPressed logic)
+      IconButton(
+        onPressed: () {
+          // Empty logic for News
+        },
+        icon: Icon(
+          Icons.article,
+          color: Colors.grey,
+        ),
+        tooltip: 'News',
+      ),
+      // Icon Profile
+      IconButton(
+        onPressed: () {
+          Get.toNamed(Routes.MAINPROFILE);
+        },
+        icon: Icon(
+          Icons.person,
+          color: Colors.grey,
+        ),
+        tooltip: 'Profil',
+      ),
+    ],
+  ),
+),
+
     );
   }
 

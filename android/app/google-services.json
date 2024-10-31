@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "393889487161",
+    "project_id": "kazakopiapp",
+    "storage_bucket": "kazakopiapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:393889487161:android:653cf777f90c5368efb0e8",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDW94J8mVm8-EmjkPRSigzaox2YufnNh7w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

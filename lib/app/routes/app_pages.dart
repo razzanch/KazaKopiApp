@@ -4,20 +4,34 @@ import '../modules/cart/bindings/cart_binding.dart';
 import '../modules/cart/views/cart_view.dart';
 import '../modules/coffe_powder/bindings/coffe_powder_binding.dart';
 import '../modules/coffe_powder/views/coffe_powder_view.dart';
+import '../modules/deleteacc/bindings/deleteacc_binding.dart';
+import '../modules/deleteacc/views/deleteacc_view.dart';
 import '../modules/detail_bubuk/bindings/detail_bubuk_binding.dart';
 import '../modules/detail_bubuk/views/detail_bubuk_view.dart';
 import '../modules/detail_minuman/bindings/detail_minuman_binding.dart';
 import '../modules/detail_minuman/views/detail_minuman_view.dart';
+import '../modules/helpcenter/bindings/helpcenter_binding.dart';
+import '../modules/helpcenter/views/helpcenter_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/landing_page/bindings/landing_page_binding.dart';
 import '../modules/landing_page/views/landing_page_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/mainprofile/bindings/mainprofile_binding.dart';
+import '../modules/mainprofile/views/mainprofile_view.dart';
+import '../modules/myfav/bindings/myfav_binding.dart';
+import '../modules/myfav/views/myfav_view.dart';
+import '../modules/myorder/bindings/myorder_binding.dart';
+import '../modules/myorder/views/myorder_view.dart';
 import '../modules/order/bindings/order_binding.dart';
 import '../modules/order/views/order_view.dart';
+import '../modules/ourig/bindings/ourig_binding.dart';
+import '../modules/ourig/views/ourig_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
+import '../modules/resetpw/bindings/resetpw_binding.dart';
+import '../modules/resetpw/views/resetpw_view.dart';
 import '../modules/signup/bindings/signup_binding.dart';
 import '../modules/signup/views/signup_view.dart';
 import '../modules/stock/bindings/stock_binding.dart';
@@ -28,7 +42,7 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.LANDING_PAGE;
+  static const INITIAL = Routes.MAINPROFILE;
 
   static final routes = [
     GetPage(
@@ -85,6 +99,41 @@ class AppPages {
       name: _Paths.ORDER,
       page: () => OrderView(),
       binding: OrderBinding(),
+    ),
+    GetPage(
+      name: _Paths.MAINPROFILE,
+      page: () => MainprofileView(),
+      binding: MainprofileBinding(),
+    ),
+    GetPage(
+      name: _Paths.HELPCENTER,
+      page: () => HelpcenterView(),
+      binding: HelpcenterBinding(),
+    ),
+    GetPage(
+      name: _Paths.MYFAV,
+      page: () => MyfavView(),
+      binding: MyfavBinding(),
+    ),
+    GetPage(
+      name: _Paths.MYORDER,
+      page: () => MyorderView(),
+      binding: MyorderBinding(),
+    ),
+    GetPage(
+      name: _Paths.OURIG,
+      page: () => OurigView(),
+      binding: OurigBinding(),
+    ),
+    GetPage(
+      name: _Paths.RESETPW,
+      page: () => ResetpwView(),
+      binding: ResetpwBinding(),
+    ),
+    GetPage(
+      name: _Paths.DELETEACC,
+      page: () => DeleteaccView(),
+      binding: DeleteaccBinding(),
     ),
   ];
 }
