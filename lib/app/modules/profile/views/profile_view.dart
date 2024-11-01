@@ -139,46 +139,116 @@ class ProfileView extends GetView<ProfileController> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Name TextField
                         TextField(
                           controller: controller.nameController,
                           decoration: InputDecoration(
                             labelText: 'Name',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                            labelStyle: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
                             ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.teal),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                           ),
                         ),
-                        SizedBox(height: 10),
+                        SizedBox(height: 16),
+
+                        // Phone Number TextField
                         TextField(
                           controller: controller.phoneNumberController,
                           decoration: InputDecoration(
                             labelText: 'Phone Number',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                            labelStyle: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
                             ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.teal),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                           ),
                         ),
-                        SizedBox(height: 10),
+                        SizedBox(height: 16),
+
+                        // Email TextField (Read-only)
                         TextField(
                           controller: controller.emailController,
+                          readOnly: true,
+                          enabled: false,
                           decoration: InputDecoration(
                             labelText: 'Email',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                            labelStyle: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
                             ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            disabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[100],
+                            suffixIcon: Icon(Icons.lock, color: Colors.grey),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                           ),
                         ),
-                        SizedBox(height: 10),
+                        SizedBox(height: 16),
+
+                        // Instagram TextField
                         TextField(
                           controller: controller.instagramController,
                           decoration: InputDecoration(
                             labelText: 'Instagram',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                            labelStyle: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
                             ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.teal),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                           ),
                         ),
                         SizedBox(height: 20),
+
+                        // Update Profile Button
                         Center(
                           child: SizedBox(
                             width: double.infinity,
@@ -193,7 +263,7 @@ class ProfileView extends GetView<ProfileController> {
                                 backgroundColor: Colors.teal,
                                 padding: EdgeInsets.symmetric(vertical: 15),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                             ),
