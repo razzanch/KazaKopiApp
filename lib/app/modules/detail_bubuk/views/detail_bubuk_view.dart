@@ -1,9 +1,113 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:myapp/app/routes/app_pages.dart';
-import '../controllers/detail_bubuk_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class DetailBubukView extends GetView<DetailBubukController> {
+class DetailBubukView extends StatefulWidget {
+  final String description;
+  final num harga1000gr;
+  final num harga100gr;
+  final num harga200gr;
+  final num harga300gr;
+  final num harga500gr;
+  final String imageUrl;
+  final String location;
+  final String name;
+  final bool status;
+
+  DetailBubukView({
+    required this.description,
+    required this.harga1000gr,
+    required this.harga100gr,
+    required this.harga200gr,
+    required this.harga300gr,
+    required this.harga500gr,
+    required this.imageUrl,
+    required this.location,
+    required this.name,
+    required this.status,
+  });
+
+  @override
+  _DetailBubukViewState createState() => _DetailBubukViewState();
+}
+
+class _DetailBubukViewState extends State<DetailBubukView> {
+  int quantity100gr = 0;
+  int quantity200gr = 0;
+  int quantity300gr = 0;
+  int quantity500gr = 0;
+  int quantity1000gr = 0;
+
+  // Variable to hold the total calculated price
+  num totalCalculatePrice = 0;
+
+  // Method to calculate the total price based on quantities and prices
+  void _calculateTotalPrice() {
+    setState(() {
+      totalCalculatePrice = (quantity100gr * widget.harga100gr) +
+          (quantity200gr * widget.harga200gr) +
+          (quantity300gr * widget.harga300gr) +
+          (quantity500gr * widget.harga500gr) +
+          (quantity1000gr * widget.harga1000gr);
+    });
+  }
+
+  // Method to handle adding the selected items to the cart
+  Future<void> _addToCart() async {
+    // Check if at least one quantity is greater than zero
+    if (quantity1000gr <= 0 &&
+        quantity100gr <= 0 &&
+        quantity200gr <= 0 &&
+        quantity300gr <= 0 &&
+        quantity500gr <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please select at least one quantity.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return; // Exit the function if no quantity is selected
+    }
+
+    try {
+      // Reference to the Firestore collection
+      CollectionReference cartBubuk = FirebaseFirestore.instance.collection('cartbubuk');
+
+      // Adding the data to Firestore
+      await cartBubuk.add({
+        'imageUrl': widget.imageUrl,
+        'harga1000gram': widget.harga1000gr,
+        'harga100gram': widget.harga100gr,
+        'harga200gram': widget.harga200gr,
+        'harga300gram': widget.harga300gr,
+        'harga500gram': widget.harga500gr,
+        'location': widget.location,
+        'name': widget.name,
+        'quantity1000gram': quantity1000gr,
+        'quantity100gram': quantity100gr,
+        'quantity200gram': quantity200gr,
+        'quantity300gram': quantity300gr,
+        'quantity500gram': quantity500gr,
+        'total': totalCalculatePrice,
+      });
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added to cart!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      // Show error message if adding to cart fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add to cart: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,225 +126,203 @@ class DetailBubukView extends GetView<DetailBubukController> {
             child: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () {
-                Get.toNamed(Routes.HOME); // Back logic
+                Navigator.pop(context);
               },
             ),
           ),
         ),
-        actions: [
-          Obx(() => IconButton(
-                icon: Icon(
-                  controller.isFavorite.value
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  color: controller.isFavorite.value
-                      ? Colors.red
-                      : Colors.red.withOpacity(0.5),
-                ),
-                onPressed: controller.toggleFavorite,
-              )),
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Obx(() => Stack(
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      height: 420,
-                      child: Image.asset(
-                        controller
-                            .coffeeMenus[controller.currentMenuIndex.value]
-                            .imagePath,
-                        fit: BoxFit.cover,
-                      ),
+            Stack(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 420,
+                  child: Image.asset(
+                    widget.imageUrl,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
                     ),
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                controller
-                                    .coffeeMenus[controller.currentMenuIndex.value]
-                                    .name,
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                Icon(Icons.star, color: Colors.amber, size: 20),
-                                Text(
-                                  "${controller.coffeeMenus[controller.currentMenuIndex.value].rating}",
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.white),
-                                ),
-                              ],
-                            ),
-                          ],
+                    child: Center(
+                      child: Text(
+                        widget.name,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                     ),
-                  ],
-                )),
+                  ),
+                ),
+              ],
+            ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_left, color: Colors.teal, size: 30),
-                    onPressed: controller.previousMenu,
-                  ),
-                  Text(
-                    "Coffee Size",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                  Center(
+                    child: Text(
+                      "DESCRIPTION",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
+                      ),
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.arrow_right, color: Colors.teal, size: 30),
-                    onPressed: controller.nextMenu,
+                  SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      widget.description,
+                      style: TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Center(
+                    child: Text(
+                      "COFFEE POWDER SIZE",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 16),
-            Column(
-              children: controller.coffeePrices.keys.map((size) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Center(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 8.0,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.teal,
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: Text(
-                              "${size} G",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Center(
-                          child: Text(
-                            "Rp${controller.coffeePrices[size]}",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Obx(() => Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  icon: Icon(Icons.remove_circle_outline,
-                                      color: Colors.brown),
-                                  onPressed: () =>
-                                      controller.decrementQuantity(size),
-                                ),
-                                Text(
-                                  "${controller.quantities[size]}",
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.add_circle_outline,
-                                      color: Colors.brown),
-                                  onPressed: () =>
-                                      controller.incrementQuantity(size),
-                                ),
-                              ],
-                            )),
-
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () {
-                          // Add to cart logic
-                          ; // Call your addToCart method
-                          Get.toNamed(Routes.CART); // Navigate to the Cart page
-                        },
-                        child: Text(
-                          "Add to Cart",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Obx(() => Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.teal[700],
-                            borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(30),
-                              bottomRight: Radius.circular(30),
-                            ),
-                          ),
-                          child: Text(
-                            "Rp${controller.totalPrice.value.toString()}",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )),
-                  ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildPriceRow("100 G", widget.harga100gr, quantity100gr, (newQuantity) {
+                    setState(() => quantity100gr = newQuantity);
+                    _calculateTotalPrice();
+                  }),
+                  SizedBox(height: 15.0),
+                  _buildPriceRow("200 G", widget.harga200gr, quantity200gr, (newQuantity) {
+                    setState(() => quantity200gr = newQuantity);
+                    _calculateTotalPrice();
+                  }),
+                  SizedBox(height: 15.0),
+                  _buildPriceRow("300 G", widget.harga300gr, quantity300gr, (newQuantity) {
+                    setState(() => quantity300gr = newQuantity);
+                    _calculateTotalPrice();
+                  }),
+                  SizedBox(height: 15.0),
+                  _buildPriceRow("500 G", widget.harga500gr, quantity500gr, (newQuantity) {
+                    setState(() => quantity500gr = newQuantity);
+                    _calculateTotalPrice();
+                  }),
+                  SizedBox(height: 15.0),
+                  _buildPriceRow("1000 G", widget.harga1000gr, quantity1000gr, (newQuantity) {
+                    setState(() => quantity1000gr = newQuantity);
+                    _calculateTotalPrice();
+                  }),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    textStyle: TextStyle(fontSize: 20),
+                  ),
+                  onPressed: _addToCart, // Call the add to cart method
+                  child: Text(
+                    "Add to Cart | Rp$totalCalculatePrice",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build price row with quantity selector
+  Widget _buildPriceRow(String label, num price, int quantity, Function(int) onQuantityChanged) {
+    return Row(
+      children: [
+        Container(
+          margin: EdgeInsets.only(right: 8.0),
+          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+          decoration: BoxDecoration(
+            color: Colors.teal,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Spacer(),
+        Transform.translate(
+          offset: Offset(-20, 0),
+          child: Text(
+            "Rp$price",
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.black,
+            ),
+          ),
+        ),
+        SizedBox(width: 8),
+        _buildCircleButton(Icons.remove, () {
+          if (quantity > 0) {
+            onQuantityChanged(quantity - 1);
+          }
+        }),
+        SizedBox(width: 8),
+        Text(
+          quantity.toString(),
+          style: TextStyle(fontSize: 20),
+        ),
+        SizedBox(width: 8),
+        _buildCircleButton(Icons.add, () {
+          onQuantityChanged(quantity + 1);
+        }),
+      ],
+    );
+  }
+
+  // Helper method to create circular buttons
+  Widget _buildCircleButton(IconData icon, VoidCallback onPressed) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.teal,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(icon, color: Colors.white),
         ),
       ),
     );

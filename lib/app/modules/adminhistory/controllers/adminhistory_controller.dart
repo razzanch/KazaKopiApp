@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
-class CoffePowderController extends GetxController {
-  //TODO: Implement CoffePowderController
+class AdminhistoryController extends GetxController {
+  //TODO: Implement AdminhistoryController
 
   final count = 0.obs;
   @override

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/login/controllers/login_controller.dart';
+
 import 'package:myapp/app/routes/app_pages.dart';
 
 class MainprofileView extends StatefulWidget {
@@ -8,6 +10,8 @@ class MainprofileView extends StatefulWidget {
 }
 
 class _MainprofileViewState extends State<MainprofileView> {
+
+    final LoginController loginController = Get.put(LoginController());
   // Controllers for TextFields
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -23,7 +27,8 @@ class _MainprofileViewState extends State<MainprofileView> {
   }
 
   void _deleteAccount() {
-    Get.toNamed(Routes.DELETEACC); // Redirect to login or another screen after deletion
+    Get.toNamed(
+        Routes.DELETEACC); // Redirect to login or another screen after deletion
   }
 
   @override
@@ -58,7 +63,7 @@ class _MainprofileViewState extends State<MainprofileView> {
                     icon: Icon(Icons.logout),
                     color: Colors.red,
                     onPressed: () {
-                      Get.toNamed(Routes.LOGIN);
+                      loginController.logout();
                     },
                     tooltip: 'Logout',
                   ),
@@ -127,18 +132,19 @@ class _MainprofileViewState extends State<MainprofileView> {
                     ),
                   ),
                   SizedBox(height: 20),
-                 TextField(
-  controller: _uidController,
-  readOnly: true, // TextField readOnly
-  decoration: InputDecoration(
-    labelText: 'User ID',
-    filled: true, // Enables the background color
-    fillColor: Colors.grey, // Sets background color to light gray
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(10),
-    ),
-  ),
-),
+                  TextField(
+                    controller: _uidController,
+                    readOnly: true, // TextField readOnly
+                    decoration: InputDecoration(
+                      labelText: 'User ID',
+                      filled: true, // Enables the background color
+                      fillColor:
+                          Colors.grey, // Sets background color to light gray
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
 
                   SizedBox(height: 20),
                   Center(
@@ -162,7 +168,8 @@ class _MainprofileViewState extends State<MainprofileView> {
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.teal,
-                              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 15, horizontal: 10),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(5),
                               ),
@@ -188,7 +195,8 @@ class _MainprofileViewState extends State<MainprofileView> {
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFFCECECE),
-                              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 15, horizontal: 10),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(5),
                               ),
@@ -214,7 +222,8 @@ class _MainprofileViewState extends State<MainprofileView> {
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
-                              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 15, horizontal: 10),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(5),
                               ),
@@ -280,7 +289,7 @@ class _MainprofileViewState extends State<MainprofileView> {
                     ],
                   ),
                   SizedBox(height: 20),
-                  
+
                   // Thin divider below image section
                   Divider(thickness: 1, color: Colors.grey), // Thin separator
                   SizedBox(height: 10), // Space between divider and text
@@ -303,67 +312,67 @@ class _MainprofileViewState extends State<MainprofileView> {
       ),
       // Bottom Navigation Bar (Navbar)
       bottomNavigationBar: Container(
-  height: 50,
-  color: const Color.fromARGB(255, 255, 255, 255),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceAround,
-    children: [
-      // Home Icon
-      IconButton(
-        onPressed: () {
-          Get.toNamed(Routes.HOME); // Navigate to the home page
-        },
-        icon: Icon(Icons.home, color: Colors.grey),
-        tooltip: 'Home',
-      ),
-      // Cart Icon
-      IconButton(
-        onPressed: () {
-          Get.toNamed(Routes.CART); // Navigate to the cart page
-        },
-        icon: Icon(Icons.shopping_cart, color: Colors.grey),
-        tooltip: 'Cart',
-      ),
-      // News Icon (empty onPressed logic)
-      IconButton(
-        onPressed: () {}, // Leave empty for News section
-        icon: Icon(Icons.article, color: Colors.grey),
-        tooltip: 'News',
-      ),
-      // Profile Icon with highlight background
-      Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Color(0xFF495048), // Gray highlight color
-        ),
-        child: IconButton(
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('Warning'),
-                  content: const Text('Anda sudah berada di halaman profile'),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        Get.back(); // Close the dialog
-                      },
-                      child: const Text('OK'),
-                    ),
-                  ],
-                );
+        height: 50,
+        color: const Color.fromARGB(255, 255, 255, 255),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // Home Icon
+            IconButton(
+              onPressed: () {
+                Get.toNamed(Routes.HOME); // Navigate to the home page
               },
-            );
-          },
-          icon: Icon(Icons.person, color: Colors.white),
-          tooltip: 'Profil',
+              icon: Icon(Icons.home, color: Colors.grey),
+              tooltip: 'Home',
+            ),
+            // Cart Icon
+            IconButton(
+              onPressed: () {
+                Get.toNamed(Routes.CART); // Navigate to the cart page
+              },
+              icon: Icon(Icons.shopping_cart, color: Colors.grey),
+              tooltip: 'Cart',
+            ),
+            // News Icon (empty onPressed logic)
+            IconButton(
+              onPressed: () {}, // Leave empty for News section
+              icon: Icon(Icons.article, color: Colors.grey),
+              tooltip: 'News',
+            ),
+            // Profile Icon with highlight background
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFF495048), // Gray highlight color
+              ),
+              child: IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Warning'),
+                        content:
+                            const Text('Anda sudah berada di halaman profile'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Get.back(); // Close the dialog
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                icon: Icon(Icons.person, color: Colors.white),
+                tooltip: 'Profil',
+              ),
+            ),
+          ],
         ),
       ),
-    ],
-  ),
-),
-
     );
   }
 }

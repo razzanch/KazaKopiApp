@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
-class StockController extends GetxController {
-  //TODO: Implement StockController
+class CreateminumanController extends GetxController {
+  //TODO: Implement CreateminumanController
 
   final count = 0.obs;
   @override

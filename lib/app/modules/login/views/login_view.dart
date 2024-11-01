@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:myapp/app/routes/app_pages.dart';
 import '../controllers/login_controller.dart';
 
-class LoginView extends GetView<LoginController> {
+class LoginView extends StatelessWidget {
+  final LoginController controller = Get.put(LoginController(), permanent: true);
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   LoginView() {
-    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
@@ -33,13 +37,11 @@ class LoginView extends GetView<LoginController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo
             Center(
               child: Column(
                 children: [
                   Image.asset('assets/LOGO.png', height: 100),
                   SizedBox(height: 30),
-                  // App Name
                   Text(
                     "Kaza Kopi Nusantara",
                     style: TextStyle(
@@ -49,7 +51,6 @@ class LoginView extends GetView<LoginController> {
                     ),
                   ),
                   SizedBox(height: 10),
-                  // Login Text
                   Text(
                     "Login to your account",
                     style: TextStyle(
@@ -60,12 +61,9 @@ class LoginView extends GetView<LoginController> {
                 ],
               ),
             ),
-
             SizedBox(height: 40),
-
-            // Email TextField
             TextField(
-              controller: controller.emailController,
+              controller: emailController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -76,10 +74,8 @@ class LoginView extends GetView<LoginController> {
               ),
             ),
             SizedBox(height: 20),
-
-            // Password TextField
             TextField(
-              controller: controller.passwordController,
+              controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
@@ -90,10 +86,7 @@ class LoginView extends GetView<LoginController> {
                 hintText: 'Enter your password',
               ),
             ),
-
             SizedBox(height: 20),
-
-            // Forgot Password Link
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
@@ -108,48 +101,43 @@ class LoginView extends GetView<LoginController> {
                 ),
               ),
             ),
-
             SizedBox(height: 20),
-
-            // Login Button
             Obx(() => ElevatedButton(
-              onPressed: controller.isLoading.value
-                  ? null // Disable button saat loading
-                  : () async {
-                      String email = controller.emailController.text;
-                      String password = controller.passwordController.text;
+                  onPressed: controller.isLoading.value
+                      ? null
+                      : () async {
+                          String email = emailController.text;
+                          String password = passwordController.text;
 
-                      // Panggil fungsi login dari controller
-                      await controller.loginUser(email, password);
-                      if (controller.isLoading.value == false) {
-                        await showNotification(); // Tampilkan notifikasi setelah login berhasil
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[800], // Button color
-                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-              ),
-              child: controller.isLoading.value
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text(
-                      'Login',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
-                    ),
-            )),
-
+                          bool success = await controller.loginUser(email, password);
+                          if (success) {
+                            await showNotification(); // Tampilkan notifikasi hanya jika login berhasil
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[800],
+                    padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  ),
+                  child: controller.isLoading.value
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                )),
             SizedBox(height: 20),
-
-            // Sign Up Link
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text("Don't have an account?"),
                 TextButton(
                   onPressed: () {
-                    Get.toNamed(Routes.SIGNUP);
+                    emailController.clear();
+                    passwordController.clear();
+                    Get.toNamed('/signup'); // Adjust route if needed
                   },
                   child: Text(
                     'Sign Up',

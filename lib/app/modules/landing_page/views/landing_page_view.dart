@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
 import 'package:myapp/app/routes/app_pages.dart';
-
 import '../controllers/landing_page_controller.dart';
-
-
 
 class LandingPageView extends GetView<LandingPageController> {
   @override
@@ -13,21 +9,16 @@ class LandingPageView extends GetView<LandingPageController> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        // Menggunakan Center untuk memusatkan konten
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo and Image
+            // Logo dan Gambar
             Padding(
               padding: const EdgeInsets.only(top: 50.0),
               child: Column(
                 children: [
-                  // Logo from your assets
                   Image.asset('assets/LOGO.png', height: 100),
-
                   SizedBox(height: 40),
-
-                  // Title Text
                   Text(
                     "Kaza Kopi Nusantara",
                     style: TextStyle(
@@ -36,10 +27,7 @@ class LandingPageView extends GetView<LandingPageController> {
                       color: Colors.grey[800],
                     ),
                   ),
-
                   SizedBox(height: 50),
-
-                  // Subtitle Text
                   Text(
                     "Time for a coffee break....",
                     style: TextStyle(
@@ -47,10 +35,7 @@ class LandingPageView extends GetView<LandingPageController> {
                       color: Colors.grey[700],
                     ),
                   ),
-
                   SizedBox(height: 40),
-
-                  // Description Text
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40.0),
                     child: Text(
@@ -65,16 +50,26 @@ class LandingPageView extends GetView<LandingPageController> {
                 ],
               ),
             ),
-
-            SizedBox(
-                height: 40), // Menambahkan ruang antara deskripsi dan tombol
-
-            // Get Started Button
+            SizedBox(height: 40), // Spasi antara deskripsi dan tombol
+            // Tombol Get Started
             Padding(
               padding: const EdgeInsets.only(bottom: 40.0),
               child: ElevatedButton(
-                onPressed: () {
-                  Get.toNamed(Routes.LOGIN);
+                onPressed: () async {
+                  // Cek status login sebelum navigasi
+                  await controller.checkLoginStatus();
+                  if (controller.isLoggedIn.value) {
+                    if (controller.isAdmin.value) {
+                      // Jika user adalah admin, arahkan ke AdminHome
+                      Get.offAllNamed(Routes.ADMINHOME);
+                    } else {
+                      // Jika user bukan admin, arahkan ke Home
+                      Get.offAllNamed(Routes.HOME);
+                    }
+                  } else {
+                    // Jika belum login, arahkan ke Login
+                    Get.offAllNamed(Routes.LOGIN);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[800],

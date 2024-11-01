@@ -1,235 +1,294 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:myapp/app/routes/app_pages.dart';
-import '../controllers/detail_minuman_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class DetailMinumanView extends GetView<DetailMinumanController> {
+class DetailMinumanView extends StatefulWidget {
+  final String description;
+  final num hargalarge;
+  final num hargasmall;
+  final String imageUrl;
+  final String location;
+  final String name;
+  final bool status;
+
+  DetailMinumanView({
+    required this.description,
+    required this.hargalarge,
+    required this.hargasmall,
+    required this.imageUrl,
+    required this.location,
+    required this.name,
+    required this.status,
+  });
+
+  @override
+  _DetailMinumanViewState createState() => _DetailMinumanViewState();
+}
+
+class _DetailMinumanViewState extends State<DetailMinumanView> {
+  int quantitySmall = 0;
+  int quantityLarge = 0;
+  num totalCalculatePrice = 0;
+
+  void _calculateTotalPrice() {
+    setState(() {
+      totalCalculatePrice = (quantitySmall * widget.hargasmall) +
+          (quantityLarge * widget.hargalarge);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: Text(
-          'Coffee Menu',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.teal,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Get.toNamed(Routes.HOME);
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.favorite, color: Colors.red),
-            onPressed: () {
-              Get.toNamed(Routes.HOME);
-            },
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
           ),
-        ],
+        ),
       ),
-      body: Obx(() {
-        if (controller.product.value == null) {
-          return ListView.builder(
-            itemCount: controller.products.length,
-            itemBuilder: (context, index) {
-              final product = controller.products[index];
-              return ListTile(
-                leading: Image.asset(product.image, width: 50, height: 50),
-                title: Text(product.name),
-                subtitle: Text('RP ${product.price.toStringAsFixed(0)}'),
-                trailing: Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  controller.product.value = product;
-                },
-              );
-            },
-          );
-        }
-
-        final product = controller.product.value!;
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Column(
-                  children: [
-                    Image.asset(
-                      product.image,
-                      height: 200,
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            final currentIndex = controller.products.indexOf(product);
-                            if (currentIndex > 0) {
-                              controller.product.value = controller.products[currentIndex - 1];
-                            }
-                          },
-                          child: Text(
-                            'Previous',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            product.name,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            final currentIndex = controller.products.indexOf(product);
-                            if (currentIndex < controller.products.length - 1) {
-                              controller.product.value = controller.products[currentIndex + 1];
-                            }
-                          },
-                          child: Text(
-                            'Next',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF00796B),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.star, color: Colors.white, size: 16),
-                          SizedBox(width: 5),
-                          Text(
-                            product.rating.toString(),
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'Coffee Size',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  ChoiceChip(
-                    label: Text('SMALL'),
-                    selected: controller.selectedSize.value == 'SMALL',
-                    selectedColor: Color(0xFF5F6D6D),
-                    backgroundColor: Colors.grey[300],
-                    onSelected: (bool selected) {
-                      if (selected) controller.setSize('SMALL');
-                    },
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 420,
+                  child: Image.asset(
+                    widget.imageUrl,
+                    fit: BoxFit.cover,
                   ),
-                  SizedBox(width: 10),
-                  ChoiceChip(
-                    label: Text('LARGE'),
-                    selected: controller.selectedSize.value == 'LARGE',
-                    selectedColor: Color(0xFF5F6D6D),
-                    backgroundColor: Colors.grey[300],
-                    onSelected: (bool selected) {
-                      if (selected) controller.setSize('LARGE');
-                    },
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Text(
-                'About',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
                 ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                product.description,
-                style: TextStyle(fontSize: 16, color: Colors.black54),
-                textAlign: TextAlign.justify,
-              ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'RP ${product.price.toStringAsFixed(0)}',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
                     ),
-                  ),
-                  Container(
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        controller.addToCart(); // Optional: You can keep this line if you want to retain the cart functionality
-                        Get.toNamed(Routes.CART); // Navigate to the Cart page
-                      },
+                    child: Center(
                       child: Text(
-                        'Add to Cart',
+                        widget.name,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF00A18E),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Text(
+                      "DESCRIPTION",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      widget.description,
+                      style: TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Center(
+                    child: Text(
+                      "COFFEE DRINK SIZE",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
                       ),
                     ),
                   ),
                 ],
               ),
-            ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildPriceRow("Small", widget.hargasmall, quantitySmall, (newQuantity) {
+                    setState(() => quantitySmall = newQuantity);
+                    _calculateTotalPrice();
+                  }),
+                  SizedBox(height: 15.0),
+                  _buildPriceRow("Large", widget.hargalarge, quantityLarge, (newQuantity) {
+                    setState(() => quantityLarge = newQuantity);
+                    _calculateTotalPrice();
+                  }),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    textStyle: TextStyle(fontSize: 20),
+                  ),
+                  onPressed: () async {
+                    // Check if at least one quantity is greater than zero
+                    if (quantityLarge <= 0 && quantitySmall <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Please select at least one quantity.'),
+                          backgroundColor: Colors.red, // Set to red for failure
+                        ),
+                      );
+                      return; // Exit the function
+                    }
+
+                    try {
+                      CollectionReference cartMinuman = FirebaseFirestore.instance.collection('cartminuman');
+
+                      await cartMinuman.add({
+                        'imageUrl': widget.imageUrl,
+                        'hargalarge': widget.hargalarge,
+                        'hargasmall': widget.hargasmall,
+                        'location': widget.location,
+                        'name': widget.name,
+                        'quantitylarge': quantityLarge,
+                        'quantitysmall': quantitySmall,
+                        'total': totalCalculatePrice,
+                      });
+
+                      // Show success message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Added to cart!'),
+                          backgroundColor: Colors.green, // Set to green for success
+                        ),
+                      );
+                    } catch (e) {
+                      // Show failure message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Failed to add to cart: $e'),
+                          backgroundColor: Colors.red, // Set to red for failure
+                        ),
+                      );
+                    }
+                  },
+                  child: Text(
+                    "Add to Cart | Rp$totalCalculatePrice",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build price row with quantity selector
+  Widget _buildPriceRow(String label, num price, int quantity, Function(int) onQuantityChanged) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Container(
+          margin: EdgeInsets.only(right: 8.0),
+          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+          decoration: BoxDecoration(
+            color: Colors.teal,
+            borderRadius: BorderRadius.circular(20),
           ),
-        );
-      }),
+          child: Text(
+            "$label",
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Transform.translate(
+          offset: Offset(20, 0), // Move the price text 10 pixels to the right
+          child: Text(
+            "Rp $price",
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Spacer(),
+        _buildCircleButton(Icons.remove, () {
+          if (quantity > 0) onQuantityChanged(quantity - 1);
+        }),
+        SizedBox(width: 8),
+        Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.teal,
+          ),
+          child: Text(
+            '$quantity',
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ),
+        SizedBox(width: 8),
+        _buildCircleButton(Icons.add, () {
+          onQuantityChanged(quantity + 1);
+        }),
+      ],
+    );
+  }
+
+  Widget _buildCircleButton(IconData icon, VoidCallback onPressed) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Color(0xFF5D0437), // Button color
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 }

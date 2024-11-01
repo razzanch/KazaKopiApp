@@ -1,58 +1,60 @@
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Pastikan untuk mengimpor FirebaseAuth
-import '../../home/views/home_view.dart'; // Sesuaikan dengan jalur yang benar untuk HomeView
+import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:myapp/app/modules/login/views/login_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../home/views/home_view.dart';
+import '../../adminhome/views/adminhome_view.dart';
 
 class LoginController extends GetxController {
-  // Controllers for email and password fields
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  
-  // Observable loading state
-  RxBool isLoading = false.obs; // Inisialisasi variabel isLoading
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Observable count variable (you can keep or remove this if not needed)
-  final count = 0.obs;
+  RxBool isLoading = false.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-  }
-
-  @override
-  void onReady() {
-    super.onReady();
-  }
-
-  @override
-  void onClose() {
-    // Dispose the controllers when the controller is closed to free up resources
-    emailController.dispose();
-    passwordController.dispose();
-    super.onClose();
-  }
-
-  void increment() => count.value++;
-
-  // Fungsi untuk login pengguna
-  Future<void> loginUser(String email, String password) async {
+  Future<bool> loginUser(String email, String password) async {
     try {
-      isLoading.value = true; // Set isLoading ke true
-      final FirebaseAuth _auth = FirebaseAuth.instance; // Inisialisasi FirebaseAuth
+      isLoading.value = true;
 
+      // Attempt login with Firebase
       await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // Tampilkan pesan sukses
+      // Save login status and email in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', 'your_token_value');
+      await prefs.setString('email', email); // Menyimpan email pengguna
+
+      // Show success message
       Get.snackbar('Success', 'Login successful', backgroundColor: Colors.green);
 
-      Get.off(HomeView()); // Navigasi ke HomeView setelah login berhasil
+      // Check if the email is admin
+      if (email == 'admin123@gmail.com') {
+        Get.offAll(() => AdminhomeView()); // Navigate to AdminhomeView for admin
+      } else {
+        Get.offAll(() => HomeView()); // Navigate to HomeView for regular users
+      }
+
+      return true;
     } catch (error) {
       Get.snackbar('Error', 'Login failed: $error', backgroundColor: Colors.red);
+      return false;
     } finally {
-      isLoading.value = false; // Set isLoading ke false setelah proses login selesai
+      isLoading.value = false;
     }
+  }
+
+  // Fungsi untuk logout
+  void logout() async {
+    await _auth.signOut();
+
+    // Remove token and email from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('email'); // Hapus email saat logout
+
+    // Redirect to login page
+    Get.offAll(() => LoginView());
   }
 }

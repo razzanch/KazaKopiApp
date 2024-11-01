@@ -11,9 +11,7 @@ abstract class Routes {
   static const SIGNUP = _Paths.SIGNUP;
   static const DETAIL_BUBUK = _Paths.DETAIL_BUBUK;
   static const DETAIL_MINUMAN = _Paths.DETAIL_MINUMAN;
-  static const STOCK = _Paths.STOCK;
-  static const COFFE_POWDER = _Paths.COFFE_POWDER;
-  static const ORDER = _Paths.ORDER;
+
   static const MAINPROFILE = _Paths.MAINPROFILE;
   static const HELPCENTER = _Paths.HELPCENTER;
   static const MYFAV = _Paths.MYFAV;
@@ -21,6 +19,11 @@ abstract class Routes {
   static const OURIG = _Paths.OURIG;
   static const RESETPW = _Paths.RESETPW;
   static const DELETEACC = _Paths.DELETEACC;
+  static const ADMINHOME = _Paths.ADMINHOME;
+  static const ADMINORDER = _Paths.ADMINORDER;
+  static const ADMINHISTORY = _Paths.ADMINHISTORY;
+  static const CREATEMINUMAN = _Paths.CREATEMINUMAN;
+  static const CREATEBUBUK = _Paths.CREATEBUBUK;
 }
 
 abstract class _Paths {
@@ -33,9 +36,6 @@ abstract class _Paths {
   static const SIGNUP = '/signup';
   static const DETAIL_BUBUK = '/detail-bubuk';
   static const DETAIL_MINUMAN = '/detail-minuman';
-  static const STOCK = '/stock';
-  static const COFFE_POWDER = '/coffe-powder';
-  static const ORDER = '/order';
   static const MAINPROFILE = '/mainprofile';
   static const HELPCENTER = '/helpcenter';
   static const MYFAV = '/myfav';
@@ -43,4 +43,9 @@ abstract class _Paths {
   static const OURIG = '/ourig';
   static const RESETPW = '/resetpw';
   static const DELETEACC = '/deleteacc';
+  static const ADMINHOME = '/adminhome';
+  static const ADMINORDER = '/adminorder';
+  static const ADMINHISTORY = '/adminhistory';
+  static const CREATEMINUMAN = '/createminuman';
+  static const CREATEBUBUK = '/createbubuk';
 }

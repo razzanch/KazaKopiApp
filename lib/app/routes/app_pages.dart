@@ -1,9 +1,17 @@
 import 'package:get/get.dart';
 
+import '../modules/adminhistory/bindings/adminhistory_binding.dart';
+import '../modules/adminhistory/views/adminhistory_view.dart';
+import '../modules/adminhome/bindings/adminhome_binding.dart';
+import '../modules/adminhome/views/adminhome_view.dart';
+import '../modules/adminorder/bindings/adminorder_binding.dart';
+import '../modules/adminorder/views/adminorder_view.dart';
 import '../modules/cart/bindings/cart_binding.dart';
 import '../modules/cart/views/cart_view.dart';
-import '../modules/coffe_powder/bindings/coffe_powder_binding.dart';
-import '../modules/coffe_powder/views/coffe_powder_view.dart';
+import '../modules/createbubuk/bindings/createbubuk_binding.dart';
+import '../modules/createbubuk/views/createbubuk_view.dart';
+import '../modules/createminuman/bindings/createminuman_binding.dart';
+import '../modules/createminuman/views/createminuman_view.dart';
 import '../modules/deleteacc/bindings/deleteacc_binding.dart';
 import '../modules/deleteacc/views/deleteacc_view.dart';
 import '../modules/detail_bubuk/bindings/detail_bubuk_binding.dart';
@@ -24,8 +32,6 @@ import '../modules/myfav/bindings/myfav_binding.dart';
 import '../modules/myfav/views/myfav_view.dart';
 import '../modules/myorder/bindings/myorder_binding.dart';
 import '../modules/myorder/views/myorder_view.dart';
-import '../modules/order/bindings/order_binding.dart';
-import '../modules/order/views/order_view.dart';
 import '../modules/ourig/bindings/ourig_binding.dart';
 import '../modules/ourig/views/ourig_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
@@ -34,15 +40,13 @@ import '../modules/resetpw/bindings/resetpw_binding.dart';
 import '../modules/resetpw/views/resetpw_view.dart';
 import '../modules/signup/bindings/signup_binding.dart';
 import '../modules/signup/views/signup_view.dart';
-import '../modules/stock/bindings/stock_binding.dart';
-import '../modules/stock/views/stock_view.dart';
 
 part 'app_routes.dart';
 
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.MAINPROFILE;
+  static const INITIAL = Routes.LANDING_PAGE;
 
   static final routes = [
     GetPage(
@@ -77,28 +81,13 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.DETAIL_BUBUK,
-      page: () => DetailBubukView(),
+      page: () => DetailBubukView(description: '', harga1000gr: 0, harga100gr: 0, harga200gr: 0, harga300gr: 0, harga500gr: 0, imageUrl: '', location: '', name: '', status: true,),
       binding: DetailBubukBinding(),
     ),
     GetPage(
       name: _Paths.DETAIL_MINUMAN,
-      page: () => DetailMinumanView(),
+      page: () => DetailMinumanView(description: '', hargalarge: 0, hargasmall: 0, imageUrl: '', location: '', name: '', status: true,),
       binding: DetailMinumanBinding(),
-    ),
-    GetPage(
-      name: _Paths.STOCK,
-      page: () => StockView(),
-      binding: StockBinding(),
-    ),
-    GetPage(
-      name: _Paths.COFFE_POWDER,
-      page: () => CoffePowderView(),
-      binding: CoffePowderBinding(),
-    ),
-    GetPage(
-      name: _Paths.ORDER,
-      page: () => OrderView(),
-      binding: OrderBinding(),
     ),
     GetPage(
       name: _Paths.MAINPROFILE,
@@ -134,6 +123,31 @@ class AppPages {
       name: _Paths.DELETEACC,
       page: () => DeleteaccView(),
       binding: DeleteaccBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMINHOME,
+      page: () => AdminhomeView(),
+      binding: AdminhomeBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMINORDER,
+      page: () => const AdminorderView(),
+      binding: AdminorderBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMINHISTORY,
+      page: () => const AdminhistoryView(),
+      binding: AdminhistoryBinding(),
+    ),
+    GetPage(
+      name: _Paths.CREATEMINUMAN,
+      page: () => CreateminumanView(isEdit: false),
+      binding: CreateminumanBinding(),
+    ),
+    GetPage(
+      name: _Paths.CREATEBUBUK,
+      page: () => CreatebubukView(isEdit: false),
+      binding: CreatebubukBinding(),
     ),
   ];
 }

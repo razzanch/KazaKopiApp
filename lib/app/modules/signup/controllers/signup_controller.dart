@@ -2,7 +2,6 @@ import '../../home/views/home_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../login/views/login_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpController extends GetxController {
@@ -35,14 +34,6 @@ class SignUpController extends GetxController {
   }
 
 
-
-  // Fungsi untuk logout
-  void logout() async {
-    await _auth.signOut();
-    Get.offAll(LoginView());
-  }
-
-  // Helper function untuk menyimpan data pengguna ke Firestore
   // Helper function untuk menyimpan data pengguna ke Firestore
 Future<void> _saveUserDataToFirestore(String username, String phoneNumber, String? uid) async {
     if (uid != null) {
