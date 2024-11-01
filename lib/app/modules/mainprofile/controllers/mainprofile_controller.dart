@@ -4,16 +4,16 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MainProfileController extends GetxController {
-  // Reactive variables
   var username = ''.obs;
   var email = ''.obs;
   var phoneNumber = ''.obs;
   var uid = ''.obs;
+  var profileImageUrl = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    _fetchUserData(); // Call the function to fetch user data
+    _fetchUserData();
   }
 
   void _fetchUserData() {
@@ -30,6 +30,7 @@ class MainProfileController extends GetxController {
           email.value = data['email'] ?? '';
           phoneNumber.value = data['phoneNumber'] ?? '';
           uid.value = data['uid'] ?? '';
+          profileImageUrl.value = data['urlImage'] ?? '';
         } else {
           print("User not found");
         }
@@ -37,5 +38,9 @@ class MainProfileController extends GetxController {
     } else {
       print("No user is signed in");
     }
+  }
+
+  bool isNetworkImage(String path) {
+    return path.startsWith('http://') || path.startsWith('https://');
   }
 }

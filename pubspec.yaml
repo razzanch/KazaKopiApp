@@ -106,6 +106,12 @@ flutter:
     - assets/MyFav.png
     - assets/MyOrder.png
     - assets/OurIG.png
+    - assets/pp1.jpg
+    - assets/pp2.jpg
+    - assets/pp3.jpg
+    - assets/pp4.jpg
+    - assets/pp5.jpg
+    - assets/pp6.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

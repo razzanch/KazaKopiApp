@@ -7,13 +7,58 @@ class ProfileController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Contoh TextEditingController untuk form input
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController instagramController = TextEditingController();
 
-  // Fungsi untuk mengupdate profil pengguna
+  // Define RxString for selected image path
+  final Rx<String> selectedImagePath = "assets/razzan.jpg".obs;
+
+  // Define the list of available images
+  final List<String> availableImages = [
+    "assets/razzan.jpg",
+    "assets/M4.png",
+    "assets/pp1.jpg",
+    "assets/pp2.jpg",
+    "assets/pp3.jpg",
+    "assets/pp4.jpg",
+    "assets/pp5.jpg",
+    "assets/pp6.jpg",
+    // Add more asset paths as needed
+  ];
+
+  // Define the method to update selected image
+  void updateSelectedImage(String imagePath) {
+    selectedImagePath.value = imagePath;
+  }
+
+  // Function to load initial data if needed
+  @override
+  void onInit() {
+    super.onInit();
+    loadUserData();
+  }
+
+  // Function to load user data
+  void loadUserData() async {
+    String uid = _auth.currentUser?.uid ?? '';
+    try {
+      var userData = await _firestore.collection('users').doc(uid).get();
+      if (userData.exists) {
+        var data = userData.data();
+        nameController.text = data?['name'] ?? '';
+        phoneNumberController.text = data?['phoneNumber'] ?? '';
+        emailController.text = data?['email'] ?? '';
+        instagramController.text = data?['instagram'] ?? '';
+        selectedImagePath.value = data?['urlImage'] ?? 'assets/razzan.jpg';
+      }
+    } catch (e) {
+      print('Error loading user data: $e');
+    }
+  }
+
+  // Updated updateProfile function
   void updateProfile() async {
     String uid = _auth.currentUser?.uid ?? '';
 
@@ -23,17 +68,18 @@ class ProfileController extends GetxController {
         'phoneNumber': phoneNumberController.text,
         'email': emailController.text,
         'instagram': instagramController.text,
+        'urlImage': selectedImagePath.value,
         'lastUpdate': FieldValue.serverTimestamp(),
       });
       Get.snackbar("Success", "Profile updated successfully");
     } catch (e) {
       Get.snackbar("Error", "Failed to update profile");
+      print('Error updating profile: $e');
     }
   }
 
   @override
   void onClose() {
-    // Pastikan untuk membersihkan controller saat tidak digunakan
     nameController.dispose();
     phoneNumberController.dispose();
     emailController.dispose();

@@ -25,10 +25,20 @@ class MainProfileView extends StatelessWidget {
                 Positioned(
                   top: 100,
                   left: MediaQuery.of(context).size.width / 2 - 80,
-                  child: CircleAvatar(
-                    radius: 80,
-                    backgroundImage: AssetImage('assets/razzan.jpg'),
-                  ),
+                  child: Obx(() => CircleAvatar(
+                        radius: 80,
+                        backgroundImage: controller
+                                .profileImageUrl.value.isNotEmpty
+                            ? controller.isNetworkImage(
+                                    controller.profileImageUrl.value)
+                                ? NetworkImage(controller.profileImageUrl.value)
+                                : AssetImage(controller.profileImageUrl.value)
+                                    as ImageProvider
+                            : AssetImage('assets/razzan.jpg') as ImageProvider,
+                        onBackgroundImageError: (exception, stackTrace) {
+                          print('Error loading profile image: $exception');
+                        },
+                      )),
                 ),
                 // Logout Button at the top right corner
                 Positioned(

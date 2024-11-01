@@ -1,40 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-
 import 'package:myapp/app/modules/profile/controllers/profile_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 
-class ProfileView extends StatefulWidget {
-  @override
-  _ProfileViewState createState() => _ProfileViewState();
-}
+class ProfileView extends GetView<ProfileController> {
+  const ProfileView({Key? key}) : super(key: key);
 
-class _ProfileViewState extends State<ProfileView> {
-  File? _image;
-  final ImagePicker _picker = ImagePicker();
-
-  // Get the ProfileController
-  final ProfileController profileController = Get.put(ProfileController());
-
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
-    }
+  void _showImagePickerDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Choose Profile Picture',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 16),
+                Container(
+                  height: 200,
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    itemCount: controller.availableImages.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          controller.updateSelectedImage(
+                              controller.availableImages[index]);
+                          Navigator.pop(context);
+                        },
+                        child: CircleAvatar(
+                          radius: 30,
+                          backgroundImage:
+                              AssetImage(controller.availableImages[index]),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _updateProfile() {
-    // Check if all TextFields are filled
-    if (profileController.nameController.text.isEmpty ||
-        profileController.phoneNumberController.text.isEmpty ||
-        profileController.emailController.text.isEmpty ||
-        profileController.instagramController.text.isEmpty) {
-      // Show a snackbar or alert dialog to indicate that fields are required
+    if (controller.nameController.text.isEmpty ||
+        controller.phoneNumberController.text.isEmpty ||
+        controller.emailController.text.isEmpty ||
+        controller.instagramController.text.isEmpty) {
       Get.snackbar(
         'Error',
         'Please fill in all fields',
@@ -44,9 +71,7 @@ class _ProfileViewState extends State<ProfileView> {
       );
       return;
     }
-
-    // Call the updateProfile method from the controller
-    profileController.updateProfile();
+    controller.updateProfile();
   }
 
   @override
@@ -76,7 +101,6 @@ class _ProfileViewState extends State<ProfileView> {
               color: Colors.white,
               child: Column(
                 children: [
-                  // Header with Avatar
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 0),
                     child: Column(
@@ -85,17 +109,17 @@ class _ProfileViewState extends State<ProfileView> {
                           child: Column(
                             children: [
                               SizedBox(height: 10),
-                              CircleAvatar(
-                                radius: 60,
-                                backgroundImage: _image == null
-                                    ? AssetImage('assets/razzan.jpg')
-                                    : FileImage(_image!) as ImageProvider,
-                              ),
+                              Obx(() => CircleAvatar(
+                                    radius: 60,
+                                    backgroundImage: AssetImage(
+                                        controller.selectedImagePath.value),
+                                  )),
                               SizedBox(height: 10),
                               TextButton(
-                                onPressed: _pickImage,
+                                onPressed: () =>
+                                    _showImagePickerDialog(context),
                                 child: Text(
-                                  'Edit Photo or Avatar',
+                                  'Choose Profile Picture',
                                   style: TextStyle(
                                     color: Colors.teal,
                                     fontSize: 18,
@@ -110,14 +134,13 @@ class _ProfileViewState extends State<ProfileView> {
                       ],
                     ),
                   ),
-                  // User Information
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextField(
-                          controller: profileController.nameController,
+                          controller: controller.nameController,
                           decoration: InputDecoration(
                             labelText: 'Name',
                             border: OutlineInputBorder(
@@ -127,7 +150,7 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                         SizedBox(height: 10),
                         TextField(
-                          controller: profileController.phoneNumberController,
+                          controller: controller.phoneNumberController,
                           decoration: InputDecoration(
                             labelText: 'Phone Number',
                             border: OutlineInputBorder(
@@ -137,7 +160,7 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                         SizedBox(height: 10),
                         TextField(
-                          controller: profileController.emailController,
+                          controller: controller.emailController,
                           decoration: InputDecoration(
                             labelText: 'Email',
                             border: OutlineInputBorder(
@@ -147,7 +170,7 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                         SizedBox(height: 10),
                         TextField(
-                          controller: profileController.instagramController,
+                          controller: controller.instagramController,
                           decoration: InputDecoration(
                             labelText: 'Instagram',
                             border: OutlineInputBorder(
@@ -182,19 +205,16 @@ class _ProfileViewState extends State<ProfileView> {
                 ],
               ),
             ),
-            // Placeholder to avoid overflow
             SizedBox(height: 10),
           ],
         ),
       ),
-      // Bottom Navigation Bar
       bottomNavigationBar: Container(
         height: 50,
         color: const Color.fromARGB(255, 255, 255, 255),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            // Icon Home
             IconButton(
               padding: EdgeInsets.only(left: 60, right: 60),
               onPressed: () {
@@ -206,7 +226,6 @@ class _ProfileViewState extends State<ProfileView> {
               ),
               tooltip: 'Home',
             ),
-            // Icon Schedule
             IconButton(
               padding: EdgeInsets.only(left: 0, right: 0),
               onPressed: () {
