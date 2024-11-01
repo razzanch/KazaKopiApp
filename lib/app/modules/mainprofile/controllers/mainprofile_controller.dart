@@ -1,23 +1,41 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class MainprofileController extends GetxController {
-  //TODO: Implement MainprofileController
+class MainProfileController extends GetxController {
+  // Reactive variables
+  var username = ''.obs;
+  var email = ''.obs;
+  var phoneNumber = ''.obs;
+  var uid = ''.obs;
 
-  final count = 0.obs;
   @override
   void onInit() {
     super.onInit();
+    _fetchUserData(); // Call the function to fetch user data
   }
 
-  @override
-  void onReady() {
-    super.onReady();
+  void _fetchUserData() {
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .snapshots()
+          .listen((snapshot) {
+        if (snapshot.exists) {
+          Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+          username.value = data['username'] ?? '';
+          email.value = data['email'] ?? '';
+          phoneNumber.value = data['phoneNumber'] ?? '';
+          uid.value = data['uid'] ?? '';
+        } else {
+          print("User not found");
+        }
+      });
+    } else {
+      print("No user is signed in");
+    }
   }
-
-  @override
-  void onClose() {
-    super.onClose();
-  }
-
-  void increment() => count.value++;
 }

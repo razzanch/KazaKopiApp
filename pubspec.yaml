@@ -2,7 +2,7 @@ name: myapp
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.4.3 <4.0.0'
+  sdk: ">=3.4.3 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -31,16 +31,18 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   get: ^4.6.6
-  image_picker:
   firebase_core: ^3.6.0
   firebase_auth: ^5.3.1
   flutter_local_notifications: ^17.2.4
   cloud_firestore: ^5.4.4
+
+  image_picker: ^0.8.7
+  firebase_storage: 12.3.4
+  cached_network_image: ^3.2.0
 
 dev_dependencies:
   flutter_test:
@@ -58,7 +60,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -66,47 +67,45 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-  - assets/razzan.jpg
-  - assets/sukses.png
-  - assets/dana.png
-  - assets/linkaja.png
-  - assets/visa.png
-  - assets/LOGO.png
-  - assets/news1.png
-  - assets/news2.png
-  - assets/news3.png
-  - assets/BK1.png
-  - assets/BK2.png
-  - assets/BK3.png
-  - assets/BK4.png
-  - assets/BK5.png
-  - assets/BK6.png
-  - assets/BK7.png
-  - assets/BK8.png
-  - assets/BK9.png
-  - assets/BK10.png
-  - assets/BK11.png
-  - assets/BK12.png
-  - assets/BK13.png
-  - assets/BK14.png
-  - assets/BK15.png
-  - assets/BK16.png
-  - assets/BK17.png
-  - assets/BK18.png
-  - assets/BK19.png
-  - assets/BK20.png
-  - assets/BK21.png
-  - assets/M1.png
-  - assets/M2.png
-  - assets/M3.png
-  - assets/M4.png
-  - assets/TIRAIBG.png
-  - assets/HC.png
-  - assets/MyFav.png
-  - assets/MyOrder.png
-  - assets/OurIG.png
-
-
+    - assets/razzan.jpg
+    - assets/sukses.png
+    - assets/dana.png
+    - assets/linkaja.png
+    - assets/visa.png
+    - assets/LOGO.png
+    - assets/news1.png
+    - assets/news2.png
+    - assets/news3.png
+    - assets/BK1.png
+    - assets/BK2.png
+    - assets/BK3.png
+    - assets/BK4.png
+    - assets/BK5.png
+    - assets/BK6.png
+    - assets/BK7.png
+    - assets/BK8.png
+    - assets/BK9.png
+    - assets/BK10.png
+    - assets/BK11.png
+    - assets/BK12.png
+    - assets/BK13.png
+    - assets/BK14.png
+    - assets/BK15.png
+    - assets/BK16.png
+    - assets/BK17.png
+    - assets/BK18.png
+    - assets/BK19.png
+    - assets/BK20.png
+    - assets/BK21.png
+    - assets/M1.png
+    - assets/M2.png
+    - assets/M3.png
+    - assets/M4.png
+    - assets/TIRAIBG.png
+    - assets/HC.png
+    - assets/MyFav.png
+    - assets/MyOrder.png
+    - assets/OurIG.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

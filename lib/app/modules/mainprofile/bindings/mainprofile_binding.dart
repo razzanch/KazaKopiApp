@@ -1,12 +1,9 @@
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/mainprofile/controllers/mainprofile_controller.dart';
 
-import '../controllers/mainprofile_controller.dart';
-
-class MainprofileBinding extends Bindings {
+class MainProfileBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<MainprofileController>(
-      () => MainprofileController(),
-    );
+    Get.lazyPut<MainProfileController>(() => MainProfileController());
   }
 }
