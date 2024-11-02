@@ -112,6 +112,12 @@ flutter:
     - assets/pp4.jpg
     - assets/pp5.jpg
     - assets/pp6.jpg
+    - assets/pp7.jpg
+    - assets/pp8.jpg
+    - assets/pp9.jpg
+    - assets/pp10.jpg
+    - assets/pp11.jpg
+    - assets/pp12.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

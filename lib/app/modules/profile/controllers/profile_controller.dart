@@ -12,6 +12,9 @@ class ProfileController extends GetxController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController instagramController = TextEditingController();
 
+  // UID RxString
+  final Rx<String> uid = ''.obs;
+
   // Define RxString for selected image path
   final Rx<String> selectedImagePath = "assets/razzan.jpg".obs;
 
@@ -25,7 +28,12 @@ class ProfileController extends GetxController {
     "assets/pp4.jpg",
     "assets/pp5.jpg",
     "assets/pp6.jpg",
-    // Add more asset paths as needed
+    "assets/pp7.jpg",
+    "assets/pp8.jpg",
+    "assets/pp9.jpg",
+    "assets/pp10.jpg",
+    "assets/pp11.jpg",
+    "assets/pp12.jpg",
   ];
 
   // Define the method to update selected image
@@ -33,7 +41,6 @@ class ProfileController extends GetxController {
     selectedImagePath.value = imagePath;
   }
 
-  // Function to load initial data if needed
   @override
   void onInit() {
     super.onInit();
@@ -42,15 +49,17 @@ class ProfileController extends GetxController {
 
   // Function to load user data
   void loadUserData() async {
-    String uid = _auth.currentUser?.uid ?? '';
+    String userUid = _auth.currentUser?.uid ?? '';
+    uid.value = userUid;
     try {
-      var userData = await _firestore.collection('users').doc(uid).get();
+      var userData = await _firestore.collection('users').doc(userUid).get();
       if (userData.exists) {
         var data = userData.data();
         nameController.text = data?['name'] ?? '';
         phoneNumberController.text = data?['phoneNumber'] ?? '';
         emailController.text = data?['email'] ?? '';
         instagramController.text = data?['instagram'] ?? '';
+
         selectedImagePath.value = data?['urlImage'] ?? 'assets/razzan.jpg';
       }
     } catch (e) {
@@ -60,15 +69,14 @@ class ProfileController extends GetxController {
 
   // Updated updateProfile function
   void updateProfile() async {
-    String uid = _auth.currentUser?.uid ?? '';
+    String userUid = _auth.currentUser?.uid ?? '';
 
     try {
-      await _firestore.collection('users').doc(uid).update({
+      await _firestore.collection('users').doc(userUid).update({
         'name': nameController.text,
         'phoneNumber': phoneNumberController.text,
-        'email': emailController.text,
-        'instagram': instagramController.text,
         'urlImage': selectedImagePath.value,
+        'instagram': instagramController.text,
         'lastUpdate': FieldValue.serverTimestamp(),
       });
       Get.snackbar("Success", "Profile updated successfully");
@@ -84,6 +92,7 @@ class ProfileController extends GetxController {
     phoneNumberController.dispose();
     emailController.dispose();
     instagramController.dispose();
+
     super.onClose();
   }
 }

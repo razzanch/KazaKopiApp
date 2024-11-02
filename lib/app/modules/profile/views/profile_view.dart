@@ -10,46 +10,56 @@ class ProfileView extends GetView<ProfileController> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          child: Container(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Choose Profile Picture',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+        return Dialog.fullscreen(
+          child: Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Text(
+                'Choose Profile Picture',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
-                SizedBox(height: 16),
-                Container(
-                  height: 200,
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                    ),
-                    itemCount: controller.availableImages.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          controller.updateSelectedImage(
-                              controller.availableImages[index]);
-                          Navigator.pop(context);
-                        },
-                        child: CircleAvatar(
-                          radius: 30,
-                          backgroundImage:
-                              AssetImage(controller.availableImages[index]),
-                        ),
-                      );
+              ),
+              backgroundColor: Colors.white,
+              elevation: 0,
+            ),
+            body: Container(
+              padding: EdgeInsets.all(16),
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1,
+                ),
+                itemCount: controller.availableImages.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      controller.updateSelectedImage(
+                          controller.availableImages[index]);
+                      Navigator.pop(context);
                     },
-                  ),
-                ),
-              ],
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.grey[300]!,
+                          width: 1,
+                        ),
+                      ),
+                      child: CircleAvatar(
+                        backgroundImage:
+                            AssetImage(controller.availableImages[index]),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         );
@@ -59,9 +69,7 @@ class ProfileView extends GetView<ProfileController> {
 
   void _updateProfile() {
     if (controller.nameController.text.isEmpty ||
-        controller.phoneNumberController.text.isEmpty ||
-        controller.emailController.text.isEmpty ||
-        controller.instagramController.text.isEmpty) {
+        controller.phoneNumberController.text.isEmpty) {
       Get.snackbar(
         'Error',
         'Please fill in all fields',
@@ -139,58 +147,35 @@ class ProfileView extends GetView<ProfileController> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Name TextField
-                        TextField(
-                          controller: controller.nameController,
-                          decoration: InputDecoration(
-                            labelText: 'Name',
-                            labelStyle: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.teal),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                          ),
-                        ),
-                        SizedBox(height: 16),
-
-                        // Phone Number TextField
-                        TextField(
-                          controller: controller.phoneNumberController,
-                          decoration: InputDecoration(
-                            labelText: 'Phone Number',
-                            labelStyle: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.teal),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                          ),
-                        ),
+                        Obx(() => TextField(
+                              controller: TextEditingController(
+                                  text: controller.uid.value),
+                              readOnly: true,
+                              enabled: false,
+                              decoration: InputDecoration(
+                                labelText: 'User ID',
+                                labelStyle: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide:
+                                      BorderSide(color: Colors.grey[300]!),
+                                ),
+                                disabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide:
+                                      BorderSide(color: Colors.grey[300]!),
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey[100],
+                                suffixIcon:
+                                    Icon(Icons.lock, color: Colors.grey),
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                              ),
+                            )),
                         SizedBox(height: 16),
 
                         // Email TextField (Read-only)
@@ -221,11 +206,50 @@ class ProfileView extends GetView<ProfileController> {
                         ),
                         SizedBox(height: 16),
 
+                        // Name TextField
+                        TextField(
+                          controller: controller.nameController,
+                          decoration: InputDecoration(
+                            labelText: 'Name',
+                            labelStyle: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+
+                        // Phone Number TextField
+// Phone Number TextField
+                        TextField(
+                          controller: controller.phoneNumberController,
+                          keyboardType: TextInputType
+                              .number, // Menampilkan keyboard angka
+                          decoration: InputDecoration(
+                            labelText: 'Phone Number',
+                            labelStyle: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+
+// Instagram TextField
                         // Instagram TextField
                         TextField(
                           controller: controller.instagramController,
                           decoration: InputDecoration(
-                            labelText: 'Instagram',
+                            labelText:
+                                'Instagram', // Tambahkan teks "(Opsional)"
                             labelStyle: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 14,
@@ -246,6 +270,7 @@ class ProfileView extends GetView<ProfileController> {
                                 horizontal: 16, vertical: 12),
                           ),
                         ),
+
                         SizedBox(height: 20),
 
                         // Update Profile Button
@@ -281,68 +306,7 @@ class ProfileView extends GetView<ProfileController> {
       ),
       bottomNavigationBar: Container(
         height: 50,
-        color: const Color.fromARGB(255, 255, 255, 255),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              padding: EdgeInsets.only(left: 60, right: 60),
-              onPressed: () {
-                Get.toNamed(Routes.HOME);
-              },
-              icon: Icon(
-                Icons.home,
-                color: Colors.grey,
-              ),
-              tooltip: 'Home',
-            ),
-            IconButton(
-              padding: EdgeInsets.only(left: 0, right: 0),
-              onPressed: () {
-                Get.toNamed(Routes.CART);
-              },
-              icon: Icon(
-                Icons.shopping_cart,
-                color: Colors.grey,
-              ),
-              tooltip: 'Cart',
-            ),
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFF495048),
-              ),
-              child: IconButton(
-                padding: EdgeInsets.only(left: 60, right: 60),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Warning'),
-                        content:
-                            const Text('Anda sudah berada di halaman profile'),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () {
-                              Get.back();
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                icon: Icon(
-                  Icons.person,
-                  color: Colors.white,
-                ),
-                tooltip: 'Profil',
-              ),
-            ),
-          ],
-        ),
+        color: Colors.white,
       ),
     );
   }
