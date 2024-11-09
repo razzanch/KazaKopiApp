@@ -107,8 +107,8 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.HELPCENTER,
-      page: () => HelpcenterView(),
-      binding: HelpcenterBinding(),
+      page: () => HelpCenterView(),
+      binding: HelpCenterBinding(),
     ),
     GetPage(
       name: _Paths.MYFAV,

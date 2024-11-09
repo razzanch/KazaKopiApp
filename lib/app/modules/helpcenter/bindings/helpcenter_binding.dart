@@ -2,11 +2,9 @@ import 'package:get/get.dart';
 
 import '../controllers/helpcenter_controller.dart';
 
-class HelpcenterBinding extends Bindings {
+class HelpCenterBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<HelpcenterController>(
-      () => HelpcenterController(),
-    );
+    Get.lazyPut<HelpCenterController>(() => HelpCenterController());
   }
 }

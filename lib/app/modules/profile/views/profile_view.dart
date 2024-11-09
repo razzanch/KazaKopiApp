@@ -248,8 +248,7 @@ class ProfileView extends GetView<ProfileController> {
                         TextField(
                           controller: controller.instagramController,
                           decoration: InputDecoration(
-                            labelText:
-                                'Instagram', // Tambahkan teks "(Opsional)"
+                            labelText: 'Instagram',
                             labelStyle: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 14,
