@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
-class OurigController extends GetxController {
-  //TODO: Implement OurigController
+class MyanaliticsController extends GetxController {
+  //TODO: Implement MyanaliticsController
 
   final count = 0.obs;
   @override

@@ -1,8 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:myapp/app/modules/createbubuk/views/createbubuk_view.dart';
-import 'package:myapp/app/modules/createminuman/views/createminuman_view.dart';
 import 'package:myapp/app/modules/detail_bubuk/views/detail_bubuk_view.dart';
 import 'package:myapp/app/modules/detail_minuman/views/detail_minuman_view.dart';
 import 'package:myapp/app/routes/app_pages.dart';
@@ -15,55 +14,114 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final PageController pageController = PageController();
   bool isMinumanSelected = true; // Menentukan tab yang aktif
-  String selectedLocation = 'Pasar Tambak Rejo, Surabaya'; // Variabel untuk lokasi yang dipilih
+  String selectedLocation =
+      'Pasar Tambak Rejo, Surabaya'; // Variabel untuk lokasi yang dipilih
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  String? urlImage; // Variabel untuk menyimpan URL gambar pengguna
+  final String defaultImage = 'assets/LOGO.png';
+  final currentUser = FirebaseAuth.instance.currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserImage(); // Ambil data gambar pengguna saat inisialisasi
+  }
+
+  // Fungsi untuk mengambil data pengguna berdasarkan UID
+  Future<void> fetchUserImage() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+      if (userDoc.exists) {
+        setState(() {
+          urlImage = userDoc.data()?['urlImage'] ?? defaultImage;
+        });
+      } else {
+        setState(() {
+          urlImage = defaultImage;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.teal,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Location",
-              style: TextStyle(fontSize: 14, color: Colors.white70, height: 0.8),
-            ),
-            DropdownButton<String>(
-              value: selectedLocation,
-              dropdownColor: Colors.teal,
-              icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-              underline: SizedBox(),
-              isDense: true,
-              items: [
-                DropdownMenuItem(
-                  value: 'Pasar Tambak Rejo, Surabaya',
-                  child: Text('Pasar Tambak Rejo, Surabaya'),
-                ),
-                DropdownMenuItem(
-                  value: 'CitraLand CBD Boulevard, Surabaya',
-                  child: Text('CitraLand CBD Boulevard, Surabaya'),
-                ),
-              ],
-              onChanged: (newLocation) {
-                setState(() {
-                  selectedLocation = newLocation!;
-                });
-              },
-            ),
-          ],
+  backgroundColor: Colors.teal,
+  elevation: 0,
+  shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Image.asset('assets/LOGO.png', height: 40),
+  automaticallyImplyLeading: false,
+  title: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        "Location",
+        style: TextStyle(fontSize: 14, color: Colors.white70, height: 0.8),
+      ),
+      DropdownButton<String>(
+        value: selectedLocation,
+        dropdownColor: Colors.teal,
+        icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+        underline: SizedBox(),
+        isDense: true,
+        items: [
+          DropdownMenuItem(
+            value: 'Pasar Tambak Rejo, Surabaya',
+            child: Text('Pasar Tambak Rejo, Surabaya'),
+          ),
+          DropdownMenuItem(
+            value: 'CitraLand CBD Boulevard, Surabaya',
+            child: Text('CitraLand CBD Boulevard, Surabaya'),
           ),
         ],
+        onChanged: (newLocation) {
+          setState(() {
+            selectedLocation = newLocation!;
+          });
+        },
       ),
+    ],
+  ),
+ actions: [
+    Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: currentUser == null // Check if the user is logged in
+          ? ElevatedButton(
+              onPressed: () {
+                Get.toNamed(Routes.LOGIN); // Navigate to login route
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[700],
+                minimumSize: Size(60, 30), // Set smaller size for the button
+                padding: EdgeInsets.symmetric(horizontal: 10), // Reduce padding
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Login',
+                style: TextStyle(color: Colors.white, fontSize: 14),
+              ),
+            )
+          : CircleAvatar(
+              radius: 20,
+              backgroundImage: AssetImage(urlImage ?? defaultImage),
+            ),
+    ),
+  ],
+),
+
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -137,7 +195,8 @@ class _HomeViewState extends State<HomeView> {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: isMinumanSelected ? Colors.black : Colors.grey,
+                            color:
+                                isMinumanSelected ? Colors.black : Colors.grey,
                           ),
                         ),
                         if (isMinumanSelected)
@@ -163,7 +222,8 @@ class _HomeViewState extends State<HomeView> {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: !isMinumanSelected ? Colors.black : Colors.grey,
+                            color:
+                                !isMinumanSelected ? Colors.black : Colors.grey,
                           ),
                         ),
                         if (!isMinumanSelected)
@@ -182,96 +242,100 @@ class _HomeViewState extends State<HomeView> {
             // Kartu Minuman atau Bubuk Kopi
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: isMinumanSelected ? buildMinumanCards() : buildBubukKopiCards(),
+              child: isMinumanSelected
+                  ? buildMinumanCards()
+                  : buildBubukKopiCards(),
             ),
+
             SizedBox(height: 16),
           ],
         ),
       ),
       bottomNavigationBar: Container(
-  height: 50,
-  color: const Color.fromARGB(255, 255, 255, 255),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceAround,
-    children: [
-      Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFF495048), // Same color as the second example
+        height: 50,
+        color: const Color.fromARGB(255, 255, 255, 255),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color:
+                        Color(0xFF495048), // Same color as the second example
+                  ),
+                  width: 50,
+                  height: 50,
+                ),
+                IconButton(
+                  onPressed: () {
+                    // Show a dialog when the home icon is pressed
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Warning'),
+                          content:
+                              const Text('Anda sudah berada di halaman home'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Get.back(); // Close the dialog
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  icon: Icon(
+                    Icons.home,
+                    color: Colors.white,
+                  ),
+                  tooltip: 'Home',
+                ),
+              ],
             ),
-            width: 50,
-            height: 50,
-          ),
-          IconButton(
-            onPressed: () {
-              // Show a dialog when the home icon is pressed
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Warning'),
-                    content: const Text('Anda sudah berada di halaman home'),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          Get.back(); // Close the dialog
-                        },
-                        child: const Text('OK'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-            icon: Icon(
-              Icons.home,
-              color: Colors.white,
+            IconButton(
+              onPressed: () {
+                navigateToCart(); // Change to Cart route
+              },
+              icon: Icon(
+                Icons.shopping_cart,
+                color: Colors.grey,
+              ),
+              tooltip: 'Cart',
             ),
-            tooltip: 'Home',
-          ),
-        ],
-      ),
-      IconButton(
-        onPressed: () {
-          Get.toNamed(Routes.CART); // Change to Cart route
-        },
-        icon: Icon(
-          Icons.shopping_cart,
-          color: Colors.grey,
+            IconButton(
+              onPressed: () {
+               Get.toNamed(Routes.GETCONNECT);
+              },
+              icon: Icon(
+                Icons.article, // Use a suitable icon for News
+                color: Colors.grey,
+              ),
+              tooltip: 'News',
+            ),
+            IconButton(
+              onPressed: () {
+                navigateToProfile(); // Change to Profile route
+              },
+              icon: Icon(
+                Icons.person,
+                color: Colors.grey,
+              ),
+              tooltip: 'Profil',
+            ),
+          ],
         ),
-        tooltip: 'Cart',
       ),
-      IconButton(
-        onPressed: () {
-          // Logic for News icon can be added later
-        },
-        icon: Icon(
-          Icons.article, // Use a suitable icon for News
-          color: Colors.grey,
-        ),
-        tooltip: 'News',
-      ),
-      IconButton(
-        onPressed: () {
-          Get.toNamed(Routes.MAINPROFILE); // Change to Profile route
-        },
-        icon: Icon(
-          Icons.person,
-          color: Colors.grey,
-        ),
-        tooltip: 'Profil',
-      ),
-    ],
-  ),
-),
-
     );
   }
 
-Widget buildMinumanCards() {
+  Widget buildMinumanCards() {
   return StreamBuilder<QuerySnapshot>(
     stream: firestore.collection('minuman').snapshots(),
     builder: (context, snapshot) {
@@ -283,11 +347,20 @@ Widget buildMinumanCards() {
       }
       final documents = snapshot.data!.docs;
 
-      // Filter documents where status is true
+      // Filter documents by location and status
       final filteredDocuments = documents.where((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        return data['status'] == true; // Only include documents where status is true
+        return data['status'] == true && data['location'] == selectedLocation;
       }).toList();
+
+      if (filteredDocuments.isEmpty) {
+        return Center(
+          child: Text(
+            'Tidak ada minuman tersedia di lokasi ini.',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        );
+      }
 
       return GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -328,22 +401,7 @@ Widget buildMinumanCards() {
                 ),
                 SizedBox(height: 8),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailMinumanView(
-                          description: data['description'],
-                          hargalarge: data['hargalarge'],
-                          hargasmall: data['hargasmall'],
-                          imageUrl: data['imageUrl'],
-                          location: data['location'],
-                          name: data['name'],
-                          status: data['status'],
-                        ),
-                      ),
-                    );
-                  },
+                  onPressed: () => navigateToDetailMinuman(data),
                   icon: Icon(Icons.shopping_cart, color: Colors.white),
                   label: Icon(Icons.arrow_forward, color: Colors.white),
                   style: ElevatedButton.styleFrom(
@@ -358,9 +416,6 @@ Widget buildMinumanCards() {
     },
   );
 }
-
-
-
 
 Widget buildBubukKopiCards() {
   return StreamBuilder<QuerySnapshot>(
@@ -374,11 +429,20 @@ Widget buildBubukKopiCards() {
       }
       final documents = snapshot.data!.docs;
 
-      // Filter documents where status is true
+      // Filter documents by location and status
       final filteredDocuments = documents.where((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        return data['status'] == true; // Only include documents where status is true
+        return data['status'] == true && data['location'] == selectedLocation;
       }).toList();
+
+      if (filteredDocuments.isEmpty) {
+        return Center(
+          child: Text(
+            'Tidak ada bubuk kopi tersedia di lokasi ini.',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        );
+      }
 
       return GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -419,25 +483,7 @@ Widget buildBubukKopiCards() {
                 ),
                 SizedBox(height: 8),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailBubukView(
-                          description: data['description'],
-                          harga1000gr: data['harga1000gr'],
-                          harga100gr: data['harga100gr'],
-                          harga200gr: data['harga200gr'],
-                          harga300gr: data['harga300gr'],
-                          harga500gr: data['harga500gr'],
-                          imageUrl: data['imageUrl'],
-                          location: data['location'],
-                          name: data['name'],
-                          status: data['status'],
-                        ),
-                      ),
-                    );
-                  },
+                  onPressed: () => navigateToDetailBubuk(data),
                   icon: Icon(Icons.shopping_cart, color: Colors.white),
                   label: Icon(Icons.arrow_forward, color: Colors.white),
                   style: ElevatedButton.styleFrom(
@@ -454,4 +500,146 @@ Widget buildBubukKopiCards() {
 }
 
 
+//AS A GUEST
+ void showLoginDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        contentPadding: EdgeInsets.all(20),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Attention',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            IconButton(
+              icon: Icon(Icons.close, color: Colors.redAccent),
+              onPressed: () {
+                Get.back(); // Close dialog
+              },
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.block, // Restricted icon
+              color: Colors.redAccent,
+              size: 50,
+            ),
+            SizedBox(height: 10),
+            Text(
+              'You must log in first to access this page.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              TextButton(
+                onPressed: () {
+                  Get.back(); // Close dialog
+                },
+                child: Text(
+                  'CANCEL',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Get.toNamed(Routes.LOGIN); // Navigate to login page
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  'LOGIN',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
+  void navigateToCart() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      Get.toNamed(Routes.CART);
+    } else {
+      showLoginDialog(context);
+    }
+  }
+
+  void navigateToProfile() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      Get.toNamed(Routes.MAINPROFILE);
+    } else {
+      showLoginDialog(context);
+    }
+  }
+
+  void navigateToDetailMinuman(Map<String, dynamic> data) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DetailMinumanView(
+            description: data['description'],
+            hargalarge: data['hargalarge'],
+            hargasmall: data['hargasmall'],
+            imageUrl: data['imageUrl'],
+            location: data['location'],
+            name: data['name'],
+            status: data['status'],
+          ),
+        ),
+      );
+    } else {
+      showLoginDialog(context);
+    }
+  }
+
+  void navigateToDetailBubuk(Map<String, dynamic> data) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DetailBubukView(
+            description: data['description'],
+            harga1000gr: data['harga1000gr'],
+            harga100gr: data['harga100gr'],
+            harga200gr: data['harga200gr'],
+            harga300gr: data['harga300gr'],
+            harga500gr: data['harga500gr'],
+            imageUrl: data['imageUrl'],
+            location: data['location'],
+            name: data['name'],
+            status: data['status'],
+          ),
+        ),
+      );
+    } else {
+      showLoginDialog(context);
+    }
+  }
 }

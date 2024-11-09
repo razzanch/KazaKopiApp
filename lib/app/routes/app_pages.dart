@@ -1,11 +1,16 @@
 import 'package:get/get.dart';
 
+import '../modules/adminanalytics/bindings/adminanalytics_binding.dart';
+import '../modules/adminanalytics/views/adminanalytics_view.dart';
 import '../modules/adminhistory/bindings/adminhistory_binding.dart';
 import '../modules/adminhistory/views/adminhistory_view.dart';
 import '../modules/adminhome/bindings/adminhome_binding.dart';
 import '../modules/adminhome/views/adminhome_view.dart';
 import '../modules/adminorder/bindings/adminorder_binding.dart';
 import '../modules/adminorder/views/adminorder_view.dart';
+import '../modules/article_detail/bindings/article_detail_binding.dart';
+import '../modules/article_detail/views/article_detail_view.dart';
+import '../modules/article_detail/views/article_detail_web_view.dart';
 import '../modules/cart/bindings/cart_binding.dart';
 import '../modules/cart/views/cart_view.dart';
 import '../modules/createbubuk/bindings/createbubuk_binding.dart';
@@ -18,6 +23,10 @@ import '../modules/detail_bubuk/bindings/detail_bubuk_binding.dart';
 import '../modules/detail_bubuk/views/detail_bubuk_view.dart';
 import '../modules/detail_minuman/bindings/detail_minuman_binding.dart';
 import '../modules/detail_minuman/views/detail_minuman_view.dart';
+import '../modules/forgotpw/bindings/forgotpw_binding.dart';
+import '../modules/forgotpw/views/forgotpw_view.dart';
+import '../modules/getconnect/bindings/getconnect_binding.dart';
+import '../modules/getconnect/views/getconnect_view.dart';
 import '../modules/helpcenter/bindings/helpcenter_binding.dart';
 import '../modules/helpcenter/views/helpcenter_view.dart';
 import '../modules/home/bindings/home_binding.dart';
@@ -28,12 +37,17 @@ import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/mainprofile/bindings/mainprofile_binding.dart';
 import '../modules/mainprofile/views/mainprofile_view.dart';
+import '../modules/myanalitics/bindings/myanalitics_binding.dart';
+import '../modules/myanalitics/views/myanalitics_view.dart';
 import '../modules/myfav/bindings/myfav_binding.dart';
 import '../modules/myfav/views/myfav_view.dart';
+import '../modules/myhistory/bindings/myhistory_binding.dart';
+import '../modules/myhistory/views/myhistory_view.dart';
 import '../modules/myorder/bindings/myorder_binding.dart';
 import '../modules/myorder/views/myorder_view.dart';
-import '../modules/ourig/bindings/ourig_binding.dart';
-import '../modules/ourig/views/ourig_view.dart';
+
+import '../modules/ourlocation/bindings/ourlocation_binding.dart';
+import '../modules/ourlocation/views/ourlocation_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/resetpw/bindings/resetpw_binding.dart';
@@ -81,12 +95,31 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.DETAIL_BUBUK,
-      page: () => DetailBubukView(description: '', harga1000gr: 0, harga100gr: 0, harga200gr: 0, harga300gr: 0, harga500gr: 0, imageUrl: '', location: '', name: '', status: true,),
+      page: () => DetailBubukView(
+        description: '',
+        harga1000gr: 0,
+        harga100gr: 0,
+        harga200gr: 0,
+        harga300gr: 0,
+        harga500gr: 0,
+        imageUrl: '',
+        location: '',
+        name: '',
+        status: true,
+      ),
       binding: DetailBubukBinding(),
     ),
     GetPage(
       name: _Paths.DETAIL_MINUMAN,
-      page: () => DetailMinumanView(description: '', hargalarge: 0, hargasmall: 0, imageUrl: '', location: '', name: '', status: true,),
+      page: () => DetailMinumanView(
+        description: '',
+        hargalarge: 0,
+        hargasmall: 0,
+        imageUrl: '',
+        location: '',
+        name: '',
+        status: true,
+      ),
       binding: DetailMinumanBinding(),
     ),
     GetPage(
@@ -109,11 +142,7 @@ class AppPages {
       page: () => MyorderView(),
       binding: MyorderBinding(),
     ),
-    GetPage(
-      name: _Paths.OURIG,
-      page: () => OurigView(),
-      binding: OurigBinding(),
-    ),
+    
     GetPage(
       name: _Paths.RESETPW,
       page: () => ResetpwView(),
@@ -131,12 +160,12 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.ADMINORDER,
-      page: () => const AdminorderView(),
+      page: () => AdminorderView(),
       binding: AdminorderBinding(),
     ),
     GetPage(
       name: _Paths.ADMINHISTORY,
-      page: () => const AdminhistoryView(),
+      page: () => AdminhistoryView(),
       binding: AdminhistoryBinding(),
     ),
     GetPage(
@@ -148,6 +177,45 @@ class AppPages {
       name: _Paths.CREATEBUBUK,
       page: () => CreatebubukView(isEdit: false),
       binding: CreatebubukBinding(),
+    ),
+    GetPage(
+      name: _Paths.MYHISTORY,
+      page: () => MyhistoryView(),
+      binding: MyhistoryBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMINANALYTICS,
+      page: () => AdminanalyticsView(),
+      binding: AdminanalyticsBinding(),
+    ),
+    GetPage(
+      name: _Paths.MYANALITICS,
+      page: () => MyanaliticsView(),
+      binding: MyanaliticsBinding(),
+    ),
+    GetPage(
+      name: _Paths.FORGOTPW,
+      page: () => ForgotpwView(),
+      binding: ForgotpwBinding(),
+    ),
+    GetPage(
+      name: _Paths.GETCONNECT,
+      page: () => const GetconnectView(),
+      binding: GetconnectBinding(),
+    ),
+    GetPage(
+      name: _Paths.ARTICLE_DETAIL,
+      page: () => ArticleDetailView(article: Get.arguments),
+      binding: ArticleDetailBinding(),
+    ),
+    GetPage(
+        name: _Paths.ARTICLE_DETAIL_WEBVIEW,
+        page: () => ArticleDetailWebView(article: Get.arguments),
+        binding: ArticleDetailBinding()),
+    GetPage(
+      name: _Paths.OURLOCATION,
+      page: () => OurlocationView(),
+      binding: OurlocationBinding(),
     ),
   ];
 }

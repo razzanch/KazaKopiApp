@@ -22,6 +22,9 @@ class _AdminhomeViewState extends State<AdminhomeView> {
       appBar: AppBar(
         backgroundColor: Colors.teal,
         elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+        ),
         automaticallyImplyLeading: false,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,7 +257,9 @@ class _AdminhomeViewState extends State<AdminhomeView> {
 // Method untuk membangun kartu dari koleksi 'minuman'
 Widget buildMinumanCards() {
   return StreamBuilder<QuerySnapshot>(
-    stream: firestore.collection('minuman').snapshots(),
+    stream: firestore.collection('minuman')
+      .where('location', isEqualTo: selectedLocation) // Filter berdasarkan lokasi
+      .snapshots(),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return Center(child: CircularProgressIndicator());
@@ -262,7 +267,12 @@ Widget buildMinumanCards() {
       if (snapshot.hasError) {
         return Center(child: Text('Error: ${snapshot.error}'));
       }
+
       final documents = snapshot.data!.docs;
+
+      if (documents.isEmpty) {
+        return Center(child: Text('Tidak ada data untuk lokasi ini.'));
+      }
 
       return GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -359,47 +369,103 @@ Widget buildMinumanCards() {
                     ),
                     IconButton(
                       icon: Icon(Icons.info, color: Colors.blue),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text(data['name']),
-                              content: SingleChildScrollView(
-                                child: ListBody(
-                                  children: [
-                                    Text('Description: ${data['description'] ?? 'No description available.'}'),
-                                    SizedBox(height: 10),
-                                    Text('Price (Large): ${data['hargalarge'] ?? 'N/A'}'),
-                                    Text('Price (Small): ${data['hargasmall'] ?? 'N/A'}'),
-                                    SizedBox(height: 10),
-                                    Text('Location: ${data['location'] ?? 'N/A'}'),
-                                    SizedBox(height: 10),
-                                    Text('Status: ${data['status'] ? 'Tersedia' : 'Habis'}'),
-                                    SizedBox(height: 10),
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(15),
-                                      child: Image.asset(
-                                        data['imageUrl'],
-                                        height: 100,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: Text('Close'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
+                     onPressed: () {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.teal,
+        title: Center(
+          child: Text(
+            data['name'] ?? 'Item Details',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Image with rounded corners
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.asset(
+                    data['imageUrl'] ?? 'assets/default.png', // Provide a default image if none
+                    height: 150,
+                    width: 250,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              Divider(color: Colors.white),
+              SizedBox(height: 10),
+              // Description text with larger font size
+              Text(
+                'Description: ${data['description'] ?? 'No description available.'}',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 10),
+              // Price details with larger font size
+              Text(
+                'Price (Large): Rp ${data['hargalarge'] ?? 'N/A'}',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+              Text(
+                'Price (Small): Rp ${data['hargasmall'] ?? 'N/A'}',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+              SizedBox(height: 10),
+              // Location with larger font size
+              Text(
+                'Location: ${data['location'] ?? 'N/A'}',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+              SizedBox(height: 10),
+              Divider(color: Colors.white),
+              SizedBox(height: 10),
+              // Status with full-width background
+              Container(
+                width: double.infinity, // Full width
+                padding: EdgeInsets.symmetric(vertical: 10),
+                color: data['status'] == true ? Colors.green : Colors.red,
+                child: Center(
+                  child: Text(
+                    data['status'] == true ? 'Tersedia' : 'Habis',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              'Close',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+},
+
                       iconSize: 30,
                     ),
                   ],
@@ -416,7 +482,9 @@ Widget buildMinumanCards() {
 // Method untuk membangun kartu dari koleksi 'bubukkopi'
 Widget buildBubukKopiCards() {
   return StreamBuilder<QuerySnapshot>(
-    stream: firestore.collection('bubukkopi').snapshots(),
+    stream: firestore.collection('bubukkopi')
+      .where('location', isEqualTo: selectedLocation) // Filter berdasarkan lokasi
+      .snapshots(),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return Center(child: CircularProgressIndicator());
@@ -424,7 +492,12 @@ Widget buildBubukKopiCards() {
       if (snapshot.hasError) {
         return Center(child: Text('Error: ${snapshot.error}'));
       }
+
       final documents = snapshot.data!.docs;
+
+      if (documents.isEmpty) {
+        return Center(child: Text('Tidak ada data untuk lokasi ini.'));
+      }
 
       return GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -522,49 +595,125 @@ Widget buildBubukKopiCards() {
                     IconButton(
                       icon: Icon(Icons.info, color: Colors.blue),
                       onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text(data['name']),
-                              content: SingleChildScrollView(
-                                child: ListBody(
-                                  children: [
-                                    Text('Description: ${data['description'] ?? 'No description available.'}'),
-                                    SizedBox(height: 10),
-                                    Text('Price (100g): ${data['harga100gr'] ?? 'N/A'}'),
-                                    Text('Price (200g): ${data['harga200gr'] ?? 'N/A'}'),
-                                    Text('Price (300g): ${data['harga300gr'] ?? 'N/A'}'),
-                                    Text('Price (500g): ${data['harga500gr'] ?? 'N/A'}'),
-                                    Text('Price (1000g): ${data['harga1000gr'] ?? 'N/A'}'),
-                                    SizedBox(height: 10),
-                                    Text('Location: ${data['location'] ?? 'N/A'}'),
-                                    SizedBox(height: 10),
-                                    Text('Status: ${data['status'] ? 'Tersedia' : 'Habis'}'),
-                                    SizedBox(height: 10),
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(15),
-                                      child: Image.asset(
-                                        data['imageUrl'],
-                                        height: 100,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: Text('Close'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.teal,
+        title: Center(
+          child: Text(
+            data['name'] ?? 'Item Details',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image with rounded corners
+              Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.asset(
+                    data['imageUrl'] ?? 'assets/default.png', // Default image if not available
+                    height: 150,
+                    width: 250,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              Divider(color: Colors.white),
+              SizedBox(height: 10),
+              // Description
+              Text(
+                'Description:',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                data['description'] ?? 'No description available.',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              SizedBox(height: 15),
+              // Price Details
+              Text(
+                'Price List:',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '100g: Rp ${data['harga100gr'] ?? 'N/A'}',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              Text(
+                '200g: Rp ${data['harga200gr'] ?? 'N/A'}',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              Text(
+                '300g: Rp ${data['harga300gr'] ?? 'N/A'}',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              Text(
+                '500g: Rp ${data['harga500gr'] ?? 'N/A'}',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              Text(
+                '1000g: Rp ${data['harga1000gr'] ?? 'N/A'}',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              SizedBox(height: 15),
+              // Location
+              Text(
+                'Location:',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                data['location'] ?? 'N/A',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              
+              SizedBox(height: 15),
+              Divider(color: Colors.white),
+              SizedBox(height: 15),
+              // Status with colored background
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 10),
+                color: data['status'] == true ? Colors.green : Colors.red,
+                child: Center(
+                  child: Text(
+                    data['status'] == true ? 'Tersedia' : 'Habis',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text(
+              'Close',
+              style: TextStyle(color: Colors.white),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+},
+
                       iconSize: 30,
                     ),
                   ],
@@ -577,9 +726,4 @@ Widget buildBubukKopiCards() {
     },
   );
 }
-
-
-
-
-
 }

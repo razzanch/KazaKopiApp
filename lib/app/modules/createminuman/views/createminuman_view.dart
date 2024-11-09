@@ -30,7 +30,7 @@ class _CreateminumanViewState extends State<CreateminumanView> {
 
   final List<String> locations = [
     'Pasar Tambak Rejo, Surabaya',
-    'Citraland CBD Boulevard, Surabaya',
+    'CitraLand CBD Boulevard, Surabaya',
   ];
 
   @override
@@ -79,12 +79,22 @@ class _CreateminumanViewState extends State<CreateminumanView> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(widget.isEdit ? 'Edit Coffee Drink Menu' : 'Add Coffee Drink Menu', 
-        textAlign: TextAlign.left),
-        backgroundColor: Colors.teal,
-        centerTitle: false,
-        automaticallyImplyLeading: false,
-      ),
+  title: Text(
+    widget.isEdit ? 'Edit Coffee Drink Menu' : 'Add Coffee Drink Menu',
+    textAlign: TextAlign.left,
+    style: TextStyle(color: Colors.white), // Mengatur warna teks menjadi putih
+  ),
+  backgroundColor: Colors.teal,
+  centerTitle: false,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.only(
+      bottomLeft: Radius.circular(20), 
+      bottomRight: Radius.circular(20),
+    ),
+  ),
+  automaticallyImplyLeading: false,
+),
+
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(12.0),

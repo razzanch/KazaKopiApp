@@ -1,5 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:myapp/app/routes/app_pages.dart';
 
 class DetailMinumanView extends StatefulWidget {
   final String description;
@@ -28,7 +32,12 @@ class _DetailMinumanViewState extends State<DetailMinumanView> {
   int quantitySmall = 0;
   int quantityLarge = 0;
   num totalCalculatePrice = 0;
+  bool isFavorited = false;
 
+void initState() {
+  super.initState();
+  _checkIfFavorited();
+}
   void _calculateTotalPrice() {
     setState(() {
       totalCalculatePrice = (quantitySmall * widget.hargasmall) +
@@ -36,30 +45,163 @@ class _DetailMinumanViewState extends State<DetailMinumanView> {
     });
   }
 
+  void _checkIfFavorited() async {
+  final String uid = FirebaseAuth.instance.currentUser?.uid ?? "unknown";
+
+  try {
+    // Mencari apakah sudah ada dokumen dengan UID dan nama menu yang sesuai
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('favminuman')
+        .where('uid', isEqualTo: uid)
+        .where('name', isEqualTo: widget.name)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      // Jika sudah ada, set isFavorited menjadi true
+      setState(() {
+        isFavorited = true;
+      });
+    } else {
+      // Jika tidak ada, set isFavorited menjadi false
+      setState(() {
+        isFavorited = false;
+      });
+    }
+  } catch (e) {
+    // Jika terjadi error, anggap belum difavoritkan
+    setState(() {
+      isFavorited = false;
+    });
+  }
+}
+
+  void _toggleFavorite() async {
+  final String uid = FirebaseAuth.instance.currentUser?.uid ?? "unknown";
+
+  setState(() {
+    isFavorited = !isFavorited; // Toggle state
+  });
+
+  // Jika isFavorited bernilai true, simpan ke Firebase
+  if (isFavorited) {
+    try {
+      // Cek apakah sudah ada dokumen dengan UID dan nama menu yang sesuai
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('favminuman')
+          .where('uid', isEqualTo: uid)
+          .where('name', isEqualTo: widget.name)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Jika dokumen sudah ada, update dokumen tersebut
+        await querySnapshot.docs.first.reference.update({
+          'description': widget.description,
+          'hargalarge': widget.hargalarge,
+          'hargasmall': widget.hargasmall,
+          'imageUrl': widget.imageUrl,
+          'location': widget.location,
+          'status': widget.status,
+          'isFavorited': isFavorited, // Update status favorit
+        });
+      } else {
+        // Jika dokumen belum ada, tambah dokumen baru
+        await FirebaseFirestore.instance.collection('favminuman').add({
+          'uid': uid,
+          'description': widget.description,
+          'hargalarge': widget.hargalarge,
+          'hargasmall': widget.hargasmall,
+          'imageUrl': widget.imageUrl,
+          'location': widget.location,
+          'name': widget.name,
+          'status': widget.status,
+          'isFavorited': isFavorited, // Menyimpan status favorit
+        });
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added to My Favorites!'),
+          backgroundColor: Colors.green, // Set to green for success
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add to favorites: $e'),
+          backgroundColor: Colors.red, // Set to red for failure
+        ),
+      );
+    }
+  } else {
+    // Jika isFavorited bernilai false, hapus dokumen dari Firebase
+    try {
+      // Mencari dokumen dengan UID dan nama menu yang sesuai
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('favminuman')
+          .where('uid', isEqualTo: uid)
+          .where('name', isEqualTo: widget.name)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Hapus dokumen dari koleksi
+        await querySnapshot.docs.first.reference.delete();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Removed from My Favorites.'),
+            backgroundColor: Colors.red, // Set to red for removal
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to remove from favorites: $e'),
+          backgroundColor: Colors.red, // Set to red for failure
+        ),
+      );
+    }
+  }
+}
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ),
-        ),
+  backgroundColor: Colors.transparent,
+  elevation: 0,
+  leading: Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
       ),
+      child: IconButton(
+        icon: Icon(Icons.arrow_back, color: Colors.black),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+    ),
+  ),
+  actions: [
+    GestureDetector(
+      onTap: _toggleFavorite,
+      child: Icon(
+        isFavorited ? Icons.favorite : Icons.favorite_border,
+        color: isFavorited ? Colors.red : Colors.white,
+        size: 40, // Ukuran ikon
+      ),
+    ),
+    SizedBox(width: 16), // Menambahkan sedikit jarak ke kanan
+  ],
+),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -160,49 +302,151 @@ class _DetailMinumanViewState extends State<DetailMinumanView> {
                     padding: EdgeInsets.symmetric(vertical: 15),
                     textStyle: TextStyle(fontSize: 20),
                   ),
-                  onPressed: () async {
-                    // Check if at least one quantity is greater than zero
-                    if (quantityLarge <= 0 && quantitySmall <= 0) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Please select at least one quantity.'),
-                          backgroundColor: Colors.red, // Set to red for failure
-                        ),
-                      );
-                      return; // Exit the function
-                    }
+                 onPressed: () async {
+  // Check if at least one quantity is greater than zero
+  if (quantityLarge <= 0 && quantitySmall <= 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Please select at least one quantity.'),
+        backgroundColor: Colors.red, // Set to red for failure
+      ),
+    );
+    return; // Exit the function
+  }
 
-                    try {
-                      CollectionReference cartMinuman = FirebaseFirestore.instance.collection('cartminuman');
+  try {
+    String uid = FirebaseAuth.instance.currentUser?.uid ?? "unknown";
+    CollectionReference cartMinuman = FirebaseFirestore.instance.collection('cartminuman');
+    CollectionReference cartBubuk = FirebaseFirestore.instance.collection('cartbubuk');
 
-                      await cartMinuman.add({
-                        'imageUrl': widget.imageUrl,
-                        'hargalarge': widget.hargalarge,
-                        'hargasmall': widget.hargasmall,
-                        'location': widget.location,
-                        'name': widget.name,
-                        'quantitylarge': quantityLarge,
-                        'quantitysmall': quantitySmall,
-                        'total': totalCalculatePrice,
-                      });
+    // First check if the 'cartminuman' and 'cartbubuk' collections are empty
+    QuerySnapshot cartMinumanSnapshot = await cartMinuman.get();
+    QuerySnapshot cartBubukSnapshot = await cartBubuk.get();
 
-                      // Show success message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Added to cart!'),
-                          backgroundColor: Colors.green, // Set to green for success
-                        ),
-                      );
-                    } catch (e) {
-                      // Show failure message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Failed to add to cart: $e'),
-                          backgroundColor: Colors.red, // Set to red for failure
-                        ),
-                      );
-                    }
-                  },
+    if (cartMinumanSnapshot.docs.isEmpty && cartBubukSnapshot.docs.isEmpty) {
+      // Both collections are empty, proceed with adding the item
+      await cartMinuman.add({
+        'uid': uid,
+        'imageUrl': widget.imageUrl,
+        'hargalarge': widget.hargalarge,
+        'hargasmall': widget.hargasmall,
+        'location': widget.location,
+        'name': widget.name,
+        'quantitylarge': quantityLarge,
+        'quantitysmall': quantitySmall,
+        'total': totalCalculatePrice,
+      });
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added to cart!'),
+          backgroundColor: Colors.green, // Set to green for success
+        ),
+      );
+      Get.offAllNamed(Routes.CART);
+      return;
+    }
+
+    // Check if the location matches the existing cart items in both collections
+    bool isLocationValid = false;
+
+    // Check cartminuman collection
+    for (var doc in cartMinumanSnapshot.docs) {
+      if (doc['location'] == widget.location) {
+        isLocationValid = true;
+        break;
+      }
+    }
+
+    // If location is not valid in cartminuman, check cartbubuk collection
+    if (!isLocationValid) {
+      for (var doc in cartBubukSnapshot.docs) {
+        if (doc['location'] == widget.location) {
+          isLocationValid = true;
+          break;
+        }
+      }
+    }
+
+    if (!isLocationValid) {
+      // Show error message if location doesn't match
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add to cart: Different location.'),
+          backgroundColor: Colors.red, // Set to red for failure
+        ),
+      );
+      return;
+    }
+
+    // Now check if the item with the same name already exists in cartminuman
+    bool isItemExist = false;
+    DocumentSnapshot? existingDoc;
+
+    for (var doc in cartMinumanSnapshot.docs) {
+      if (doc['name'] == widget.name && doc['location'] == widget.location) {
+        isItemExist = true;
+        existingDoc = doc;
+        break;
+      }
+    }
+
+    if (isItemExist) {
+      // Item exists, update the existing document
+      await cartMinuman.doc(existingDoc!.id).update({
+        'quantitylarge': FieldValue.increment(quantityLarge),
+        'quantitysmall': FieldValue.increment(quantitySmall),
+        'total': FieldValue.increment(totalCalculatePrice),
+      });
+
+      // Show success message for update
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Item updated in cart!'),
+          backgroundColor: Colors.green, // Set to green for success
+        ),
+      );
+    } else {
+      // Item does not exist, add new item to cartminuman
+      await cartMinuman.add({
+        'uid': uid,
+        'imageUrl': widget.imageUrl,
+        'hargalarge': widget.hargalarge,
+        'hargasmall': widget.hargasmall,
+        'location': widget.location,
+        'name': widget.name,
+        'quantitylarge': quantityLarge,
+        'quantitysmall': quantitySmall,
+        'total': totalCalculatePrice,
+      });
+
+      // Show success message for new item addition
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added to cart!'),
+          backgroundColor: Colors.green, // Set to green for success
+        ),
+      );
+    }
+
+    // Navigate to cart after item is added or updated
+    Get.offAllNamed(Routes.CART);
+
+  } catch (e) {
+    // Show failure message if adding to cart fails
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to add to cart: $e'),
+        backgroundColor: Colors.red, // Set to red for failure
+      ),
+    );
+  }
+},
+
+
+
+
                   child: Text(
                     "Add to Cart | Rp$totalCalculatePrice",
                     style: TextStyle(color: Colors.white),

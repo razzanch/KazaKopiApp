@@ -1,35 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/modules/login/controllers/login_controller.dart';
-
+import 'package:myapp/app/modules/mainprofile/controllers/mainprofile_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 
-class MainprofileView extends StatefulWidget {
-  @override
-  _MainprofileViewState createState() => _MainprofileViewState();
-}
-
-class _MainprofileViewState extends State<MainprofileView> {
-
-    final LoginController loginController = Get.put(LoginController());
-  // Controllers for TextFields
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _uidController = TextEditingController();
-
-  void _updateProfile() {
-    Get.toNamed(Routes.PROFILE); // Directly route to the PROFILE page
-  }
-
-  void _resetPassword() {
-    Get.toNamed(Routes.RESETPW); // Route to reset password page
-  }
-
-  void _deleteAccount() {
-    Get.toNamed(
-        Routes.DELETEACC); // Redirect to login or another screen after deletion
-  }
+class MainprofileView extends StatelessWidget {
+  final MainprofileController controller = Get.put(MainprofileController());
+  final LoginController loginController = Get.put(LoginController());
 
   @override
   Widget build(BuildContext context) {
@@ -43,17 +20,27 @@ class _MainprofileViewState extends State<MainprofileView> {
                 Image.asset(
                   'assets/TIRAIBG.png',
                   width: MediaQuery.of(context).size.width,
-                  height: 270, // Fixed height for the background
+                  height: 270,
                   fit: BoxFit.cover,
                 ),
                 // Avatar positioned near the bottom of the background image
                 Positioned(
                   top: 100,
                   left: MediaQuery.of(context).size.width / 2 - 80,
-                  child: CircleAvatar(
-                    radius: 80,
-                    backgroundImage: AssetImage('assets/razzan.jpg'),
-                  ),
+                  child: Obx(() => CircleAvatar(
+                        radius: 80,
+                        backgroundImage: controller
+                                .profileImageUrl.value.isNotEmpty
+                            ? controller.isNetworkImage(
+                                    controller.profileImageUrl.value)
+                                ? NetworkImage(controller.profileImageUrl.value)
+                                : AssetImage(controller.profileImageUrl.value)
+                                    as ImageProvider
+                            : AssetImage('assets/pp5.jpg') as ImageProvider,
+                        onBackgroundImageError: (exception, stackTrace) {
+                          print('Error loading profile image: $exception');
+                        },
+                      )),
                 ),
                 // Logout Button at the top right corner
                 Positioned(
@@ -68,22 +55,9 @@ class _MainprofileViewState extends State<MainprofileView> {
                     tooltip: 'Logout',
                   ),
                 ),
-                // Text ID positioned in the top left corner
-                Positioned(
-                  left: 20,
-                  top: 25,
-                  child: Text(
-                    'ID: 202210370311445',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
               ],
             ),
-            SizedBox(height: 5), // Space between the avatar and the form
+            SizedBox(height: 5),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -99,53 +73,85 @@ class _MainprofileViewState extends State<MainprofileView> {
                   ),
                   Divider(thickness: 2, color: Colors.grey),
                   SizedBox(height: 20),
-                  TextField(
-                    controller: _usernameController,
-                    readOnly: true, // TextField readOnly
-                    decoration: InputDecoration(
-                      labelText: 'Username',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: _emailController,
-                    readOnly: true, // TextField readOnly
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: _phoneController,
-                    readOnly: true, // TextField readOnly
-                    decoration: InputDecoration(
-                      labelText: 'Phone Number',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: _uidController,
-                    readOnly: true, // TextField readOnly
-                    decoration: InputDecoration(
-                      labelText: 'User ID',
-                      filled: true, // Enables the background color
-                      fillColor:
-                          Colors.grey, // Sets background color to light gray
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
 
+                  // Last Update display
+                  Obx(() => Text(
+                        'Last update: ${controller.lastUpdate.value}',
+                        style: TextStyle(
+                          color: Colors.grey[800],
+                          fontSize: 16,
+                        ),
+                      )),
+                  SizedBox(height: 20),
+
+                  // Displaying the user's information in TextFields
+                  Obx(() => TextField(
+                        controller: TextEditingController(
+                            text: controller.username.value),
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          labelText: 'Username',
+                          prefixIcon: Icon(Icons.person),
+                        ),
+                      )),
+                  SizedBox(height: 20),
+                  Obx(() => TextField(
+                        controller:
+                            TextEditingController(text: controller.email.value),
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.email),
+                        ),
+                      )),
+                  SizedBox(height: 20),
+                  Obx(() => TextField(
+                        controller: TextEditingController(
+                            text: controller.phoneNumber.value),
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          labelText: 'Phone Number',
+                          prefixIcon: Icon(Icons.phone),
+                        ),
+                      )),
+                  SizedBox(height: 20),
+                  Obx(() => TextField(
+                        controller:
+                            TextEditingController(text: controller.uid.value),
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                          ),
+                          labelText: 'User ID',
+                          prefixIcon: Icon(Icons.key),
+                        ),
+                      )),
                   SizedBox(height: 20),
                   Center(
                     child: Column(
@@ -155,7 +161,9 @@ class _MainprofileViewState extends State<MainprofileView> {
                           width: double.infinity,
                           height: 50,
                           child: ElevatedButton(
-                            onPressed: _updateProfile,
+                            onPressed: () {
+                              Get.toNamed(Routes.PROFILE);
+                            },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -182,7 +190,9 @@ class _MainprofileViewState extends State<MainprofileView> {
                           width: double.infinity,
                           height: 50,
                           child: ElevatedButton(
-                            onPressed: _resetPassword,
+                            onPressed: () {
+                              Get.toNamed(Routes.RESETPW);
+                            },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -209,7 +219,9 @@ class _MainprofileViewState extends State<MainprofileView> {
                           width: double.infinity,
                           height: 50,
                           child: ElevatedButton(
-                            onPressed: _deleteAccount,
+                            onPressed: () {
+                              Get.toNamed(Routes.DELETEACC);
+                            },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -271,7 +283,7 @@ class _MainprofileViewState extends State<MainprofileView> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       GestureDetector(
-                        onTap: () => Get.toNamed(Routes.OURIG),
+                        onTap: () => Get.toNamed(Routes.OURLOCATION),
                         child: Image.asset(
                           'assets/OurIG.png',
                           width: 170,
@@ -289,21 +301,19 @@ class _MainprofileViewState extends State<MainprofileView> {
                     ],
                   ),
                   SizedBox(height: 20),
-
                   // Thin divider below image section
-                  Divider(thickness: 1, color: Colors.grey), // Thin separator
+                  Divider(thickness: 1, color: Colors.grey),
                   SizedBox(height: 10), // Space between divider and text
                   Center(
                     child: Text(
                       'Kazakopi Nusantara ©',
                       style: TextStyle(
                         color: Colors.grey,
-                        fontSize: 16,
-                        fontWeight: FontWeight.normal,
+                        fontSize: 14,
                       ),
                     ),
                   ),
-                  SizedBox(height: 20), // Space below the text
+                  SizedBox(height: 30), // Extra spacing
                 ],
               ),
             ),
@@ -335,7 +345,9 @@ class _MainprofileViewState extends State<MainprofileView> {
             ),
             // News Icon (empty onPressed logic)
             IconButton(
-              onPressed: () {}, // Leave empty for News section
+              onPressed: () {
+                Get.toNamed(Routes.GETCONNECT);
+              }, // Leave empty for News section
               icon: Icon(Icons.article, color: Colors.grey),
               tooltip: 'News',
             ),

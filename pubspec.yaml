@@ -42,7 +42,15 @@ dependencies:
   flutter_local_notifications: ^17.2.4
   cloud_firestore: ^5.4.4
   shared_preferences: ^2.3.2
-  intl: ^0.19.0
+  intl: ^0.17.0
+  rxdart: ^0.27.0
+  syncfusion_flutter_charts: ^21.2.4
+  webview_flutter: ^4.10.0
+  carousel_slider: ^5.0.0
+  
+  
+  
+
 
 dev_dependencies:
   flutter_test:
@@ -107,6 +115,13 @@ flutter:
   - assets/MyFav.png
   - assets/MyOrder.png
   - assets/OurIG.png
+  - assets/pp1.jpg
+  - assets/pp2.jpg
+  - assets/pp3.jpg
+  - assets/pp4.jpg
+  - assets/pp5.jpg
+  - assets/pp6.jpg
+
 
 
 

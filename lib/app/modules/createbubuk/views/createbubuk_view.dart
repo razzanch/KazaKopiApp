@@ -96,12 +96,19 @@ class _CreateBubukViewState extends State<CreatebubukView> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(widget.isEdit ? 'Edit Coffee Powder Menu' : 'Add Coffee Powder Menu', 
-        textAlign: TextAlign.left),
-        backgroundColor: Colors.teal,
-        centerTitle: false,
-        automaticallyImplyLeading: false,
-      ),
+  title: Text(
+    widget.isEdit ? 'Edit Coffee Powder Menu' : 'Add Coffee Powder Menu',
+    textAlign: TextAlign.left,
+    style: TextStyle(color: Colors.white), // Mengatur warna teks menjadi putih
+  ),
+  backgroundColor: Colors.teal,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+  ),
+  centerTitle: false,
+  automaticallyImplyLeading: false,
+),
+
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -197,7 +204,7 @@ class _CreateBubukViewState extends State<CreatebubukView> {
       },
       items: [
         'Pasar Tambak Rejo, Surabaya',
-        'Citraland CBD Boulevard, Surabaya',
+        'CitraLand CBD Boulevard, Surabaya',
       ].map<DropdownMenuItem<String>>((String location) {
         return DropdownMenuItem<String>(
           value: location,

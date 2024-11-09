@@ -1,5 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:myapp/app/routes/app_pages.dart';
 
 class DetailBubukView extends StatefulWidget {
   final String description;
@@ -39,6 +43,13 @@ class _DetailBubukViewState extends State<DetailBubukView> {
 
   // Variable to hold the total calculated price
   num totalCalculatePrice = 0;
+  bool isFavorited = false;
+
+
+  void initState() {
+  super.initState();
+  _checkIfFavorited();
+}
 
   // Method to calculate the total price based on quantities and prices
   void _calculateTotalPrice() {
@@ -51,29 +62,161 @@ class _DetailBubukViewState extends State<DetailBubukView> {
     });
   }
 
-  // Method to handle adding the selected items to the cart
-  Future<void> _addToCart() async {
-    // Check if at least one quantity is greater than zero
-    if (quantity1000gr <= 0 &&
-        quantity100gr <= 0 &&
-        quantity200gr <= 0 &&
-        quantity300gr <= 0 &&
-        quantity500gr <= 0) {
+  void _checkIfFavorited() async {
+  final String uid = FirebaseAuth.instance.currentUser?.uid ?? "unknown";
+
+  try {
+    // Mencari apakah sudah ada dokumen dengan UID dan nama menu yang sesuai
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('favbubuk')
+        .where('uid', isEqualTo: uid)
+        .where('name', isEqualTo: widget.name)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      // Jika sudah ada, set isFavorited menjadi true
+      setState(() {
+        isFavorited = true;
+      });
+    } else {
+      // Jika tidak ada, set isFavorited menjadi false
+      setState(() {
+        isFavorited = false;
+      });
+    }
+  } catch (e) {
+    // Jika terjadi error, anggap belum difavoritkan
+    setState(() {
+      isFavorited = false;
+    });
+  }
+}
+
+  void _toggleFavorite() async {
+  final String uid = FirebaseAuth.instance.currentUser?.uid ?? "unknown";
+
+  setState(() {
+    isFavorited = !isFavorited; // Toggle state
+  });
+
+  // Jika isFavorited bernilai true, simpan ke Firebase
+  if (isFavorited) {
+    try {
+      // Cek apakah sudah ada dokumen dengan UID dan nama menu yang sesuai
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('favbubuk')
+          .where('uid', isEqualTo: uid)
+          .where('name', isEqualTo: widget.name)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Jika dokumen sudah ada, update dokumen tersebut
+        await querySnapshot.docs.first.reference.update({
+          'description': widget.description,
+          'harga1000gr': widget.harga1000gr,
+          'harga100gr': widget.harga100gr,
+          'harga200gr': widget.harga200gr,
+          'harga300gr': widget.harga300gr,
+          'harga500gr': widget.harga500gr,
+          'imageUrl': widget.imageUrl,
+          'location': widget.location,
+          'status': widget.status,
+          'isFavorited': isFavorited, // Update status favorit
+        });
+      } else {
+        // Jika dokumen belum ada, tambah dokumen baru
+        await FirebaseFirestore.instance.collection('favbubuk').add({
+          'uid': uid,
+          'description': widget.description,
+          'harga1000gr': widget.harga1000gr,
+          'harga100gr': widget.harga100gr,
+          'harga200gr': widget.harga200gr,
+          'harga300gr': widget.harga300gr,
+          'harga500gr': widget.harga500gr,
+          'imageUrl': widget.imageUrl,
+          'location': widget.location,
+          'name': widget.name,
+          'status': widget.status,
+          'isFavorited': isFavorited, // Menyimpan status favorit
+        });
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Please select at least one quantity.'),
-          backgroundColor: Colors.red,
+          content: Text('Added to My Favorites!'),
+          backgroundColor: Colors.green, // Set to green for success
         ),
       );
-      return; // Exit the function if no quantity is selected
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add to favorites: $e'),
+          backgroundColor: Colors.red, // Set to red for failure
+        ),
+      );
     }
-
+  } else {
+    // Jika isFavorited bernilai false, hapus dokumen dari Firebase
     try {
-      // Reference to the Firestore collection
-      CollectionReference cartBubuk = FirebaseFirestore.instance.collection('cartbubuk');
+      // Mencari dokumen dengan UID dan nama menu yang sesuai
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('favbubuk')
+          .where('uid', isEqualTo: uid)
+          .where('name', isEqualTo: widget.name)
+          .get();
 
-      // Adding the data to Firestore
+      if (querySnapshot.docs.isNotEmpty) {
+        // Hapus dokumen dari koleksi
+        await querySnapshot.docs.first.reference.delete();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Removed from My Favorites.'),
+            backgroundColor: Colors.red, // Set to red for removal
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to remove from favorites: $e'),
+          backgroundColor: Colors.red, // Set to red for failure
+        ),
+      );
+    }
+  }
+}
+
+Future<void> _addToCart() async {
+  // Check if at least one quantity is greater than zero
+  if (quantity1000gr <= 0 &&
+      quantity100gr <= 0 &&
+      quantity200gr <= 0 &&
+      quantity300gr <= 0 &&
+      quantity500gr <= 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Please select at least one quantity.'),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return; // Exit the function if no quantity is selected
+  }
+
+  try {
+    String uid = FirebaseAuth.instance.currentUser?.uid ?? "unknown";
+    // Reference to the Firestore collections
+    CollectionReference cartMinuman = FirebaseFirestore.instance.collection('cartminuman');
+    CollectionReference cartBubuk = FirebaseFirestore.instance.collection('cartbubuk');
+
+    // First, check if the 'cartminuman' and 'cartbubuk' collections are empty
+    QuerySnapshot cartMinumanSnapshot = await cartMinuman.get();
+    QuerySnapshot cartBubukSnapshot = await cartBubuk.get();
+
+    if (cartMinumanSnapshot.docs.isEmpty && cartBubukSnapshot.docs.isEmpty) {
+      // Both collections are empty, proceed with adding the item to cartbubuk
       await cartBubuk.add({
+        'uid': uid,
         'imageUrl': widget.imageUrl,
         'harga1000gram': widget.harga1000gr,
         'harga100gram': widget.harga100gr,
@@ -97,16 +240,118 @@ class _DetailBubukViewState extends State<DetailBubukView> {
           backgroundColor: Colors.green,
         ),
       );
-    } catch (e) {
-      // Show error message if adding to cart fails
+      Get.offAllNamed(Routes.CART);
+      return;
+    }
+
+    // Check if the location matches the existing items in both collections
+    bool isLocationValid = false;
+
+    // Check cartminuman collection
+    for (var doc in cartMinumanSnapshot.docs) {
+      if (doc['location'] == widget.location) {
+        isLocationValid = true;
+        break;
+      }
+    }
+
+    // If location is not valid in cartminuman, check cartbubuk collection
+    if (!isLocationValid) {
+      for (var doc in cartBubukSnapshot.docs) {
+        if (doc['location'] == widget.location) {
+          isLocationValid = true;
+          break;
+        }
+      }
+    }
+
+    if (!isLocationValid) {
+      // Show error message if location doesn't match
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to add to cart: $e'),
+          content: Text('Failed to add to cart: Different location.'),
           backgroundColor: Colors.red,
         ),
       );
+      return;
     }
+
+    // Now check if the item with the same name already exists in cartbubuk
+    bool isItemExist = false;
+    DocumentSnapshot? existingDoc;
+
+    for (var doc in cartBubukSnapshot.docs) {
+      if (doc['name'] == widget.name && doc['location'] == widget.location) {
+        isItemExist = true;
+        existingDoc = doc;
+        break;
+      }
+    }
+
+    if (isItemExist) {
+      // Item exists, update the existing document
+      await cartBubuk.doc(existingDoc!.id).update({
+        'quantity1000gram': FieldValue.increment(quantity1000gr),
+        'quantity100gram': FieldValue.increment(quantity100gr),
+        'quantity200gram': FieldValue.increment(quantity200gr),
+        'quantity300gram': FieldValue.increment(quantity300gr),
+        'quantity500gram': FieldValue.increment(quantity500gr),
+        'total': FieldValue.increment(totalCalculatePrice),
+      });
+
+      // Show success message for update
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Item updated in cart!'),
+          backgroundColor: Colors.green, // Set to green for success
+        ),
+      );
+    } else {
+      // Item does not exist, add new item to cartbubuk
+      await cartBubuk.add({
+        'uid': uid,
+        'imageUrl': widget.imageUrl,
+        'harga1000gram': widget.harga1000gr,
+        'harga100gram': widget.harga100gr,
+        'harga200gram': widget.harga200gr,
+        'harga300gram': widget.harga300gr,
+        'harga500gram': widget.harga500gr,
+        'location': widget.location,
+        'name': widget.name,
+        'quantity1000gram': quantity1000gr,
+        'quantity100gram': quantity100gr,
+        'quantity200gram': quantity200gr,
+        'quantity300gram': quantity300gr,
+        'quantity500gram': quantity500gr,
+        'total': totalCalculatePrice,
+      });
+
+      // Show success message for new item addition
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added to cart!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+
+    // Navigate to cart after item is added or updated
+    Get.offAllNamed(Routes.CART);
+
+  } catch (e) {
+    // Show error message if adding to cart fails
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to add to cart: $e'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -114,24 +359,35 @@ class _DetailBubukViewState extends State<DetailBubukView> {
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ),
-        ),
+  backgroundColor: Colors.transparent,
+  elevation: 0,
+  leading: Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
       ),
+      child: IconButton(
+        icon: Icon(Icons.arrow_back, color: Colors.black),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+    ),
+  ),
+  actions: [
+    GestureDetector(
+      onTap: _toggleFavorite,
+      child: Icon(
+        isFavorited ? Icons.favorite : Icons.favorite_border,
+        color: isFavorited ? Colors.red : Colors.white,
+        size: 40, // Ukuran ikon
+      ),
+    ),
+    SizedBox(width: 16), // Menambahkan sedikit jarak ke kanan
+  ],
+),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -299,10 +555,25 @@ class _DetailBubukViewState extends State<DetailBubukView> {
           }
         }),
         SizedBox(width: 8),
-        Text(
-          quantity.toString(),
-          style: TextStyle(fontSize: 20),
-        ),
+        Container(
+  decoration: BoxDecoration(
+    shape: BoxShape.circle,
+    color: Colors.teal, // Background color teal for quantity number
+    
+  ),
+  padding: EdgeInsets.all(16),
+   // Adjust padding for circular shape
+  child: Text(
+    quantity.toString(),
+    style: TextStyle(
+      fontSize: 18,
+      color: Colors.white,
+      fontWeight: FontWeight.bold,
+    ),
+    textAlign: TextAlign.center,
+  ),
+),
+
         SizedBox(width: 8),
         _buildCircleButton(Icons.add, () {
           onQuantityChanged(quantity + 1);
@@ -318,10 +589,10 @@ class _DetailBubukViewState extends State<DetailBubukView> {
       child: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.teal,
+          color: Color(0xFF5D0437),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(4.0),
           child: Icon(icon, color: Colors.white),
         ),
       ),

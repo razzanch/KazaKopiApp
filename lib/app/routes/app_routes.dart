@@ -24,6 +24,14 @@ abstract class Routes {
   static const ADMINHISTORY = _Paths.ADMINHISTORY;
   static const CREATEMINUMAN = _Paths.CREATEMINUMAN;
   static const CREATEBUBUK = _Paths.CREATEBUBUK;
+  static const MYHISTORY = _Paths.MYHISTORY;
+  static const ADMINANALYTICS = _Paths.ADMINANALYTICS;
+  static const MYANALITICS = _Paths.MYANALITICS;
+  static const FORGOTPW = _Paths.FORGOTPW;
+  static const GETCONNECT = _Paths.GETCONNECT;
+  static const ARTICLE_DETAIL = _Paths.ARTICLE_DETAIL;
+  static const ARTICLE_DETAIL_WEBVIEW = _Paths.ARTICLE_DETAIL_WEBVIEW;
+  static const OURLOCATION = _Paths.OURLOCATION;
 }
 
 abstract class _Paths {
@@ -48,4 +56,12 @@ abstract class _Paths {
   static const ADMINHISTORY = '/adminhistory';
   static const CREATEMINUMAN = '/createminuman';
   static const CREATEBUBUK = '/createbubuk';
+  static const MYHISTORY = '/myhistory';
+  static const ADMINANALYTICS = '/adminanalytics';
+  static const MYANALITICS = '/myanalitics';
+  static const FORGOTPW = '/forgotpw';
+  static const GETCONNECT = '/getconnect';
+  static const ARTICLE_DETAIL = '/article-detail';
+  static const ARTICLE_DETAIL_WEBVIEW = '/article-detail-webview';
+  static const OURLOCATION = '/ourlocation';
 }
