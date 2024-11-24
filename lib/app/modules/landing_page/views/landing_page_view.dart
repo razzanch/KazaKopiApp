@@ -49,7 +49,7 @@ class LandingPageView extends GetView<LandingPageController> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 40.0),
                         child: Text(
-                          "Your daily dose of fresh brew delivered to your doorstep. Start your coffee journey now!",
+                          "Your daily dose of fresh brew. Start your coffee journey now!",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 14,

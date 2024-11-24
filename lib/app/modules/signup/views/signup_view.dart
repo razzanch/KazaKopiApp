@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:myapp/app/modules/signup/views/OTPDialog.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 import '../controllers/signup_controller.dart';
 
@@ -35,6 +36,8 @@ class SignupView extends GetView<SignUpController> {
     emailController.clear();
     passwordController.clear();
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -155,50 +158,88 @@ class SignupView extends GetView<SignUpController> {
                         ),
                         SizedBox(height: 20),
                         Obx(() {
-                          return ElevatedButton(
-                            onPressed: controller.isLoading.value
-                                ? null
-                                : () async {
-                                    if (emailController.text.isNotEmpty &&
-                                        passwordController.text.isNotEmpty &&
-                                        usernameController.text.isNotEmpty &&
-                                        phoneController.text.isNotEmpty) {
-                                      try {
-                                        await controller.registerUser(
-                                          emailController.text,
-                                          passwordController.text,
-                                          usernameController.text,
-                                          phoneController.text,
-                                        );
-                                        await showNotification();
-                                        Get.toNamed(Routes.LOGIN);
-                                      } catch (error) {
-                                        Get.snackbar(
-                                          'Error',
-                                          'Sign Up failed: $error',
-                                          backgroundColor: Colors.red,
-                                        );
-                                      }
-                                    } else {
-                                      Get.snackbar(
-                                        'Error',
-                                        'Semua kolom harus diisi',
-                                        backgroundColor: Colors.red,
-                                      );
-                                    }
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey[800],
-                              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                            ),
-                            child: controller.isLoading.value
-                                ? CircularProgressIndicator(color: Colors.white)
-                                : Text(
-                                    'Sign Up',
-                                    style: TextStyle(fontSize: 16, color: Colors.white),
-                                  ),
-                          );
-                        }),
+  return ElevatedButton(
+    onPressed: controller.isLoading.value
+        ? null
+        : () async {
+            String username = usernameController.text.trim();
+            String phone = phoneController.text.trim();
+            String email = emailController.text.trim();
+            String password = passwordController.text.trim();
+
+            // Validasi username
+            if (username.isEmpty || username.length < 6) {
+              Get.snackbar(
+                'Error',
+                'Username harus minimal 6 karakter',
+                backgroundColor: Colors.red,
+              );
+              return;
+            }
+
+            // Validasi nomor telepon
+            if (phone.isEmpty || !RegExp(r'^[0-9]+$').hasMatch(phone)) {
+              Get.snackbar(
+                'Error',
+                'Nomor telepon hanya boleh berisi angka',
+                backgroundColor: Colors.red,
+              );
+              return;
+            }
+
+            // Validasi email
+            if (email.isEmpty || !RegExp(r'^[a-zA-Z0-9._%+-]+@gmail\.com$').hasMatch(email)) {
+              Get.snackbar(
+                'Error',
+                'Email harus menggunakan format @gmail.com',
+                backgroundColor: Colors.red,
+              );
+              return;
+            }
+
+            // Validasi password
+            if (password.isEmpty || password.length < 6) {
+              Get.snackbar(
+                'Error',
+                'Password harus minimal 6 karakter',
+                backgroundColor: Colors.red,
+              );
+              return;
+            }
+
+            // Jika semua validasi terpenuhi, lanjutkan proses
+            try {
+              await controller.sendOTP(email);
+              Get.dialog(
+                OTPDialog(
+                  email: email,
+                  password: password,
+                  username: username,
+                  phoneNumber: phone,
+                ),
+              );
+              await showNotification();
+            } catch (error) {
+              Get.snackbar(
+                'Error',
+                'Sign Up failed: $error',
+                backgroundColor: Colors.red,
+              );
+            }
+          },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.grey[800],
+      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+    ),
+    child: controller.isLoading.value
+        ? CircularProgressIndicator(color: Colors.white)
+        : Text(
+            'Sign Up',
+            style: TextStyle(fontSize: 16, color: Colors.white),
+          ),
+  );
+}),
+
                         SizedBox(height: 20),
                         // Text below button
                         Row(

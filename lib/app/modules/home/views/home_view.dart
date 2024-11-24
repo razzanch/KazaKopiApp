@@ -21,6 +21,10 @@ class _HomeViewState extends State<HomeView> {
   final String defaultImage = 'assets/LOGO.png';
   final currentUser = FirebaseAuth.instance.currentUser;
 
+  final TextEditingController searchController = TextEditingController();
+  String searchQuery = '';
+
+
   @override
   void initState() {
     super.initState();
@@ -128,14 +132,21 @@ class _HomeViewState extends State<HomeView> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
+  controller: searchController,
+  onChanged: (value) {
+    setState(() {
+      searchQuery = value.toLowerCase();
+    });
+  },
+  decoration: InputDecoration(
+    hintText: 'Search',
+    prefixIcon: Icon(Icons.search),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+    ),
+  ),
+),
+
             ),
             // Carousel section
             Container(
@@ -347,11 +358,14 @@ class _HomeViewState extends State<HomeView> {
       }
       final documents = snapshot.data!.docs;
 
-      // Filter documents by location and status
       final filteredDocuments = documents.where((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return data['status'] == true && data['location'] == selectedLocation;
-      }).toList();
+  final data = doc.data() as Map<String, dynamic>;
+  final name = data['name'].toString().toLowerCase();
+  return data['status'] == true &&
+      data['location'] == selectedLocation &&
+      (searchQuery.isEmpty || name.contains(searchQuery));
+}).toList();
+
 
       if (filteredDocuments.isEmpty) {
         return Center(
@@ -429,11 +443,13 @@ Widget buildBubukKopiCards() {
       }
       final documents = snapshot.data!.docs;
 
-      // Filter documents by location and status
-      final filteredDocuments = documents.where((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return data['status'] == true && data['location'] == selectedLocation;
-      }).toList();
+final filteredDocuments = documents.where((doc) {
+  final data = doc.data() as Map<String, dynamic>;
+  final name = data['name'].toString().toLowerCase();
+  return data['status'] == true &&
+      data['location'] == selectedLocation &&
+      (searchQuery.isEmpty || name.contains(searchQuery));
+}).toList();
 
       if (filteredDocuments.isEmpty) {
         return Center(

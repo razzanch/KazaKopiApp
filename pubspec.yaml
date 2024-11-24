@@ -47,6 +47,7 @@ dependencies:
   syncfusion_flutter_charts: ^21.2.4
   webview_flutter: ^4.10.0
   carousel_slider: ^5.0.0
+  mailer: ^6.2.0
   
   
   
