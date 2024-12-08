@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:myapp/app/modules/profile/controllers/profile_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 import 'package:rxdart/rxdart.dart' as rxdart; // Add prefix for rxdart
 
@@ -28,33 +30,15 @@ class _CartViewState extends State<CartView> {
   // Firestore reference for cart collections
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  final ProfileController profileController = Get.put(ProfileController());
+
   @override
   void initState() {
     super.initState();
-    _calculateTotalAmount();
-    fetchUserImage(); // Initial calculation of total amount
+    _calculateTotalAmount(); // Initial calculation of total amount
   }
 
 
-  // Fungsi untuk mengambil data pengguna berdasarkan UID
-  Future<void> fetchUserImage() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
-      if (userDoc.exists) {
-        setState(() {
-          urlImage = userDoc.data()?['urlImage'] ?? defaultImage;
-        });
-      } else {
-        setState(() {
-          urlImage = defaultImage;
-        });
-      }
-    }
-  }
 
   void _calculateTotalAmount() async {
     totalAmount = 0; // Reset the total amount
@@ -102,10 +86,22 @@ class _CartViewState extends State<CartView> {
         actions: [
   Padding(
     padding: const EdgeInsets.all(8.0),
-    child: CircleAvatar(
-      radius: 20,
-      backgroundImage: AssetImage(urlImage ?? defaultImage),
-    ),
+    child: Obx(() {
+              final imagePath = profileController.selectedImagePath.value;
+
+              return CircleAvatar(
+                radius: 20,
+                backgroundImage: imagePath.startsWith('http')
+                    ? NetworkImage(imagePath)
+                    : (File(imagePath).existsSync()
+                        ? FileImage(File(imagePath))
+                        : AssetImage('assets/pp5.jpg')) as ImageProvider,
+                onBackgroundImageError: (_, __) {
+                  // Jika gambar gagal, gunakan fallback
+                  profileController.selectedImagePath.value = 'assets/pp5.jpg';
+                },
+              );
+            }),
   ),
 ],
       ),
@@ -250,12 +246,31 @@ class _CartViewState extends State<CartView> {
             Row(
               children: [
                 // Item image
-                Image.asset(
-                  doc['imageUrl'], // Ensure this path is correct for local assets
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                ),
+               ClipRRect(
+  borderRadius: BorderRadius.circular(15),
+  child: (doc['imageUrl'] ?? '').startsWith('http')
+      ? Image.network(
+          doc['imageUrl'], // Jika URL valid
+          width: 60,
+          height: 60,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Image.asset(
+              'assets/default.png', // Fallback jika gagal memuat URL
+              width: 60,
+              height: 60,
+              fit: BoxFit.cover,
+            );
+          },
+        )
+      : Image.asset(
+          'assets/default.png', // Gunakan aset jika bukan URL
+          width: 60,
+          height: 60,
+          fit: BoxFit.cover,
+        ),
+),
+
                 SizedBox(width: 12),
                 // Name and Info button in a Row
                 Expanded(
@@ -349,11 +364,30 @@ class _CartViewState extends State<CartView> {
                   margin: EdgeInsets.symmetric(
                       vertical: 10), // Spacing around the image
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                        10), // Rounded corners for the image
-                    child: Image.asset(imageUrl,
-                        width: 250, height: 150, fit: BoxFit.cover),
-                  ),
+  borderRadius: BorderRadius.circular(10), // Rounded corners for the image
+  child: (imageUrl).startsWith('http')
+      ? Image.network(
+          imageUrl, // Jika URL valid
+          width: 250,
+          height: 150,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Image.asset(
+              'assets/default.png', // Fallback jika gagal memuat URL
+              width: 250,
+              height: 150,
+              fit: BoxFit.cover,
+            );
+          },
+        )
+      : Image.asset(
+          imageUrl.isNotEmpty ? imageUrl : 'assets/default.png', // Gunakan aset lokal jika bukan URL
+          width: 250,
+          height: 150,
+          fit: BoxFit.cover,
+        ),
+),
+
                 ),
                 // Display location
                 Text(

@@ -1,7 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/profile/controllers/profile_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 import '../controllers/helpcenter_controller.dart';
 
@@ -16,11 +18,11 @@ class _HelpcenterViewState extends State<HelpcenterView> {
   final HelpcenterController controller = Get.put(HelpcenterController());
   final TextEditingController searchController = TextEditingController();
   RxList<Map<String, String>> filteredFaqData = <Map<String, String>>[].obs;
+  final ProfileController profileController = Get.put(ProfileController());
 
   @override
   void initState() {
-    super.initState();
-    fetchUserImage(); 
+    super.initState(); 
     filteredFaqData.value = controller.faqData; // Initialize with full FAQ data
 
     // Listen for changes in search input and update filtered FAQ data
@@ -29,24 +31,7 @@ class _HelpcenterViewState extends State<HelpcenterView> {
     });
   }
 
-  Future<void> fetchUserImage() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
-      if (userDoc.exists) {
-        setState(() {
-          urlImage = userDoc.data()?['urlImage'] ?? defaultImage;
-        });
-      } else {
-        setState(() {
-          urlImage = defaultImage;
-        });
-      }
-    }
-  }
+ 
 
   // Function to filter FAQ data based on search input
   void filterFaqData() {
@@ -94,11 +79,22 @@ class _HelpcenterViewState extends State<HelpcenterView> {
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              radius: 20,
-              backgroundImage:
-                  AssetImage(urlImage ?? defaultImage),
-            ),
+            child: Obx(() {
+              final imagePath = profileController.selectedImagePath.value;
+
+              return CircleAvatar(
+                radius: 20,
+                backgroundImage: imagePath.startsWith('http')
+                    ? NetworkImage(imagePath)
+                    : (File(imagePath).existsSync()
+                        ? FileImage(File(imagePath))
+                        : AssetImage('assets/pp5.jpg')) as ImageProvider,
+                onBackgroundImageError: (_, __) {
+                  // Jika gambar gagal, gunakan fallback
+                  profileController.selectedImagePath.value = 'assets/pp5.jpg';
+                },
+              );
+            }),
           ),
         ],
       ),

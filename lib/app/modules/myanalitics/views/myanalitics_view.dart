@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/profile/controllers/profile_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -17,33 +20,10 @@ class _MyanaliticsViewState extends State<MyanaliticsView> {
   final String userUid = FirebaseAuth.instance.currentUser!.uid;
   String? urlImage; // Variabel untuk menyimpan URL gambar pengguna
   final String defaultImage = 'assets/LOGO.png';
+  final ProfileController profileController = Get.put(ProfileController());
+    
     
   
-  @override
-  void initState() {
-    super.initState();
-    fetchUserImage(); // Initial calculation of total amount
-  }
-
-  // Fungsi untuk mengambil data pengguna berdasarkan UID
-  Future<void> fetchUserImage() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
-      if (userDoc.exists) {
-        setState(() {
-          urlImage = userDoc.data()?['urlImage'] ?? defaultImage;
-        });
-      } else {
-        setState(() {
-          urlImage = defaultImage;
-        });
-      }
-    }
-  }
   
   @override
   Widget build(BuildContext context) {
@@ -71,10 +51,22 @@ class _MyanaliticsViewState extends State<MyanaliticsView> {
         actions: [
   Padding(
     padding: const EdgeInsets.all(8.0),
-    child: CircleAvatar(
-      radius: 20,
-      backgroundImage: AssetImage(urlImage ?? defaultImage),
-    ),
+    child: Obx(() {
+              final imagePath = profileController.selectedImagePath.value;
+
+              return CircleAvatar(
+                radius: 20,
+                backgroundImage: imagePath.startsWith('http')
+                    ? NetworkImage(imagePath)
+                    : (File(imagePath).existsSync()
+                        ? FileImage(File(imagePath))
+                        : AssetImage('assets/pp5.jpg')) as ImageProvider,
+                onBackgroundImageError: (_, __) {
+                  // Jika gambar gagal, gunakan fallback
+                  profileController.selectedImagePath.value = 'assets/pp5.jpg';
+                },
+              );
+            }),
   ),
 ],
       ),

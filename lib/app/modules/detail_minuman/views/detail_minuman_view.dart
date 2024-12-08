@@ -208,13 +208,28 @@ void initState() {
             Stack(
               children: [
                 SizedBox(
-                  width: double.infinity,
-                  height: 420,
-                  child: Image.asset(
-                    widget.imageUrl,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+  width: double.infinity,
+  height: 420,
+  child: ClipRRect(
+    borderRadius: BorderRadius.circular(15),
+    child: (widget.imageUrl).startsWith('http')
+        ? Image.network(
+            widget.imageUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Image.asset(
+                'assets/default.png', // Fallback jika gagal memuat URL
+                fit: BoxFit.cover,
+              );
+            },
+          )
+        : Image.asset(
+            'assets/default.png', // Gunakan aset jika bukan URL
+            fit: BoxFit.cover,
+          ),
+  ),
+),
+
                 Positioned(
                   bottom: 0,
                   left: 0,

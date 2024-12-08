@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/app/modules/createbubuk/views/createbubuk_view.dart';
 import 'package:myapp/app/modules/createminuman/views/createminuman_view.dart';
 import 'package:myapp/app/routes/app_pages.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminhomeView extends StatefulWidget {
   @override
@@ -297,13 +298,20 @@ Widget buildMinumanCards() {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Image.asset(
-                    data['imageUrl'],
-                    height: 140,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+  borderRadius: BorderRadius.circular(15),
+  child: Image(
+    image: (data['imageUrl'] ?? '').startsWith('http')
+        ? NetworkImage(data['imageUrl']) // Gunakan NetworkImage untuk URL
+        : AssetImage('assets/default.png') as ImageProvider, // Gunakan AssetImage jika bukan URL
+    height: 140,
+    width: double.infinity,
+    fit: BoxFit.cover,
+    errorBuilder: (context, error, stackTrace) {
+      return Image.asset('assets/default.png'); // Fallback image jika gagal
+    },
+  ),
+),
+
                 SizedBox(height: 8),
                 Text(
                   data['name'],
@@ -328,45 +336,66 @@ Widget buildMinumanCards() {
                       iconSize: 30,
                     ),
                     IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        // Confirmation dialog before deletion
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text('Konfirmasi Hapus'),
-                              content: Text('Apakah Anda yakin ingin menghapus item ini?'),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: Text('Batal'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                                TextButton(
-                                  child: Text('OK'),
-                                  onPressed: () {
-                                    // Delete the document
-                                    firestore.collection('minuman').doc(documents[index].id).delete().then((_) {
-                                      // Show success snackbar
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Berhasil menghapus item'),
-                                          backgroundColor: Colors.green,
-                                        ),
-                                      );
-                                    });
-                                    Navigator.of(context).pop(); // Close the dialog
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      iconSize: 30,
-                    ),
+  icon: Icon(Icons.delete, color: Colors.red),
+  onPressed: () {
+    // Confirmation dialog before deletion
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Konfirmasi Hapus'),
+          content: Text('Apakah Anda yakin ingin menghapus item ini?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Batal'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('OK'),
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog
+                
+                try {
+  final supabaseClient = Supabase.instance.client;
+  final bucketName = 'minuman_pictures';
+  
+  // Ambil semua file dari bucket
+  final response = await supabaseClient.storage.from(bucketName).list();
+
+  // Filter file yang sesuai dengan pola
+  final fileName = response
+      .map((item) => item.name)
+      .firstWhere(
+        (name) => name.startsWith('${data['name']}-') && name.endsWith('.jpg'),
+        orElse: () => throw Exception('File tidak ditemukan'),
+      );
+
+  // Hapus file
+  await supabaseClient.storage.from(bucketName).remove([fileName]);
+
+  // Hapus dokumen dari Firestore
+  await firestore.collection('minuman').doc(documents[index].id).delete();
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Berhasil menghapus item dan file gambar')),
+  );
+} catch (error) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Gagal menghapus item: $error')),
+  );
+}
+
+              },
+            ),
+          ],
+        );
+      },
+    );
+  },
+  iconSize: 30,
+),
                     IconButton(
                       icon: Icon(Icons.info, color: Colors.blue),
                      onPressed: () {
@@ -393,15 +422,20 @@ Widget buildMinumanCards() {
               // Image with rounded corners
               Container(
                 margin: EdgeInsets.symmetric(vertical: 10),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Image.asset(
-                    data['imageUrl'] ?? 'assets/default.png', // Provide a default image if none
-                    height: 150,
-                    width: 250,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                child:ClipRRect(
+  borderRadius: BorderRadius.circular(15),
+  child: Image(
+    image: (data['imageUrl'] ?? '').startsWith('http')
+        ? NetworkImage(data['imageUrl']) // Gunakan NetworkImage untuk URL
+        : AssetImage('assets/default.png') as ImageProvider, // Gunakan AssetImage jika bukan URL
+    height: 150,
+    width: 250,
+    fit: BoxFit.cover,
+    errorBuilder: (context, error, stackTrace) {
+      return Image.asset('assets/default.png'); // Fallback image jika gagal
+    },
+  ),
+),
               ),
               SizedBox(height: 10),
               Divider(color: Colors.white),
@@ -521,14 +555,20 @@ Widget buildBubukKopiCards() {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Image.asset(
-                    data['imageUrl'],
-                    height: 140,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                 ClipRRect(
+  borderRadius: BorderRadius.circular(15),
+  child: Image(
+    image: (data['imageUrl'] ?? '').startsWith('http')
+        ? NetworkImage(data['imageUrl']) // Gunakan NetworkImage untuk URL
+        : AssetImage('assets/default.png') as ImageProvider, // Gunakan AssetImage jika bukan URL
+    height: 140,
+    width: double.infinity,
+    fit: BoxFit.cover,
+    errorBuilder: (context, error, stackTrace) {
+      return Image.asset('assets/default.png'); // Fallback image jika gagal
+    },
+  ),
+),
                 SizedBox(height: 8),
                 Text(
                   data['name'],
@@ -571,18 +611,38 @@ Widget buildBubukKopiCards() {
                                 ),
                                 TextButton(
                                   child: Text('OK'),
-                                  onPressed: () {
-                                    // Delete the document
-                                    firestore.collection('bubukkopi').doc(documents[index].id).delete().then((_) {
-                                      // Show success snackbar
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Berhasil menghapus item'),
-                                          backgroundColor: Colors.green,
-                                        ),
-                                      );
-                                    });
+                                  onPressed: () async {
                                     Navigator.of(context).pop(); // Close the dialog
+                
+                try {
+  final supabaseClient = Supabase.instance.client;
+  final bucketName = 'bubuk_pictures';
+  
+  // Ambil semua file dari bucket
+  final response = await supabaseClient.storage.from(bucketName).list();
+
+  // Filter file yang sesuai dengan pola
+  final fileName = response
+      .map((item) => item.name)
+      .firstWhere(
+        (name) => name.startsWith('${data['name']}-') && name.endsWith('.jpg'),
+        orElse: () => throw Exception('File tidak ditemukan'),
+      );
+
+  // Hapus file
+  await supabaseClient.storage.from(bucketName).remove([fileName]);
+
+  // Hapus dokumen dari Firestore
+  await firestore.collection('bubukkopi').doc(documents[index].id).delete();
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Berhasil menghapus item dan file gambar')),
+  );
+} catch (error) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Gagal menghapus item: $error')),
+  );
+} // Close the dialog
                                   },
                                 ),
                               ],
@@ -617,15 +677,20 @@ Widget buildBubukKopiCards() {
             children: [
               // Image with rounded corners
               Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Image.asset(
-                    data['imageUrl'] ?? 'assets/default.png', // Default image if not available
-                    height: 150,
-                    width: 250,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                child:  ClipRRect(
+  borderRadius: BorderRadius.circular(15),
+  child: Image(
+    image: (data['imageUrl'] ?? '').startsWith('http')
+        ? NetworkImage(data['imageUrl']) // Gunakan NetworkImage untuk URL
+        : AssetImage('assets/default.png') as ImageProvider, // Gunakan AssetImage jika bukan URL
+    height: 150,
+    width: 250,
+    fit: BoxFit.cover,
+    errorBuilder: (context, error, stackTrace) {
+      return Image.asset('assets/default.png'); // Fallback image jika gagal
+    },
+  ),
+),
               ),
               SizedBox(height: 20),
               Divider(color: Colors.white),

@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/app/modules/detail_bubuk/views/detail_bubuk_view.dart';
 import 'package:myapp/app/modules/detail_minuman/views/detail_minuman_view.dart';
+import 'package:myapp/app/modules/profile/controllers/profile_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 
 class MyfavView extends StatefulWidget {
@@ -20,32 +23,7 @@ class _MyfavViewState extends State<MyfavView> {
   String? urlImage; // Variabel untuk menyimpan URL gambar pengguna
   final String defaultImage = 'assets/LOGO.png';
   final currentUser = FirebaseAuth.instance.currentUser;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchUserImage(); // Ambil data gambar pengguna saat inisialisasi
-  }
-
-  // Fungsi untuk mengambil data pengguna berdasarkan UID
-  Future<void> fetchUserImage() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
-      if (userDoc.exists) {
-        setState(() {
-          urlImage = userDoc.data()?['urlImage'] ?? defaultImage;
-        });
-      } else {
-        setState(() {
-          urlImage = defaultImage;
-        });
-      }
-    }
-  }
+  final ProfileController profileController = Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -98,10 +76,22 @@ class _MyfavViewState extends State<MyfavView> {
                 style: TextStyle(color: Colors.white, fontSize: 14),
               ),
             )
-          : CircleAvatar(
-              radius: 20,
-              backgroundImage: AssetImage(urlImage ?? defaultImage),
-            ),
+          : Obx(() {
+              final imagePath = profileController.selectedImagePath.value;
+
+              return CircleAvatar(
+                radius: 20,
+                backgroundImage: imagePath.startsWith('http')
+                    ? NetworkImage(imagePath)
+                    : (File(imagePath).existsSync()
+                        ? FileImage(File(imagePath))
+                        : AssetImage('assets/pp5.jpg')) as ImageProvider,
+                onBackgroundImageError: (_, __) {
+                  // Jika gambar gagal, gunakan fallback
+                  profileController.selectedImagePath.value = 'assets/pp5.jpg';
+                },
+              );
+            }),
     ),
   ],
 ),
@@ -293,13 +283,19 @@ Widget buildMinumanCards() {
                 Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: Image.asset(
-                        data['imageUrl'],
-                        height: 140,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+  borderRadius: BorderRadius.circular(15),
+  child: Image(
+    image: (data['imageUrl'] ?? '').startsWith('http')
+        ? NetworkImage(data['imageUrl']) // Gunakan NetworkImage untuk URL
+        : AssetImage('assets/default.png') as ImageProvider, // Gunakan AssetImage jika bukan URL
+    height: 140,
+    width: double.infinity,
+    fit: BoxFit.cover,
+    errorBuilder: (context, error, stackTrace) {
+      return Image.asset('assets/default.png'); // Fallback image jika gagal
+    },
+  ),
+),
                     Positioned(
                       top: -5,
                       right: -5,
@@ -396,13 +392,19 @@ Widget buildBubukKopiCards() {
                 Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: Image.asset(
-                        data['imageUrl'],
-                        height: 140,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+  borderRadius: BorderRadius.circular(15),
+  child: Image(
+    image: (data['imageUrl'] ?? '').startsWith('http')
+        ? NetworkImage(data['imageUrl']) // Gunakan NetworkImage untuk URL
+        : AssetImage('assets/default.png') as ImageProvider, // Gunakan AssetImage jika bukan URL
+    height: 140,
+    width: double.infinity,
+    fit: BoxFit.cover,
+    errorBuilder: (context, error, stackTrace) {
+      return Image.asset('assets/default.png'); // Fallback image jika gagal
+    },
+  ),
+),
                     Positioned(
                       top: -5,
                       right: -5,

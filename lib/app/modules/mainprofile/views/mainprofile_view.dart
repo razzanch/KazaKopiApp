@@ -1,12 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/modules/login/controllers/login_controller.dart';
 import 'package:myapp/app/modules/mainprofile/controllers/mainprofile_controller.dart';
+import 'package:myapp/app/modules/profile/controllers/profile_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 
 class MainprofileView extends StatelessWidget {
   final MainprofileController controller = Get.put(MainprofileController());
   final LoginController loginController = Get.put(LoginController());
+  final ProfileController profileController = Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -25,23 +29,26 @@ class MainprofileView extends StatelessWidget {
                 ),
                 // Avatar positioned near the bottom of the background image
                 Positioned(
-                  top: 100,
-                  left: MediaQuery.of(context).size.width / 2 - 80,
-                  child: Obx(() => CircleAvatar(
-                        radius: 80,
-                        backgroundImage: controller
-                                .profileImageUrl.value.isNotEmpty
-                            ? controller.isNetworkImage(
-                                    controller.profileImageUrl.value)
-                                ? NetworkImage(controller.profileImageUrl.value)
-                                : AssetImage(controller.profileImageUrl.value)
-                                    as ImageProvider
-                            : AssetImage('assets/pp5.jpg') as ImageProvider,
-                        onBackgroundImageError: (exception, stackTrace) {
-                          print('Error loading profile image: $exception');
-                        },
-                      )),
-                ),
+  top: 100,
+  left: MediaQuery.of(context).size.width / 2 - 80,
+  child: Obx(() {
+  final imagePath = profileController.selectedImagePath.value;
+
+  return CircleAvatar(
+    radius: 80,
+    backgroundImage: imagePath.startsWith('http')
+        ? NetworkImage(imagePath)
+        : (File(imagePath).existsSync()
+            ? FileImage(File(imagePath))
+            : AssetImage('assets/pp5.jpg')) as ImageProvider,
+    onBackgroundImageError: (_, __) {
+      // Jika gambar gagal, gunakan fallback
+      profileController.selectedImagePath.value = 'assets/pp5.jpg';
+    },
+  );
+}),
+),
+
                 // Logout Button at the top right corner
                 Positioned(
                   right: 10,

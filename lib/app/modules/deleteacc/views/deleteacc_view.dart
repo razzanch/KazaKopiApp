@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/modules/login/views/login_view.dart';
+import 'package:myapp/app/modules/profile/controllers/profile_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,31 +17,9 @@ class DeleteaccView extends StatefulWidget {
 class _DeleteaccViewState extends State<DeleteaccView> {
    String? urlImage; // Variabel untuk menyimpan URL gambar pengguna
   final String defaultImage = 'assets/LOGO.png';
+  final ProfileController profileController = Get.put(ProfileController());
   
-  @override
-  void initState() {
-    super.initState();
-    fetchUserImage();
-  }
-
-  Future<void> fetchUserImage() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
-      if (userDoc.exists) {
-        setState(() {
-          urlImage = userDoc.data()?['urlImage'] ?? defaultImage;
-        });
-      } else {
-        setState(() {
-          urlImage = defaultImage;
-        });
-      }
-    }
-  }
+ 
   // Controllers for TextFields
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -58,12 +39,41 @@ class _DeleteaccViewState extends State<DeleteaccView> {
   }
 
   void _deleteAccount() async {
-  if (_emailController.text.isEmpty ||
-      _passwordController.text.isEmpty ||
+  // Regex untuk validasi email dan password
+  final emailPattern = RegExp(r'^[a-zA-Z0-9._%+-]+@gmail\.com$'); // Email valid dengan domain @gmail.com
+  final passwordPattern = RegExp(r'^[a-zA-Z0-9]{6,}$'); // Hanya huruf dan angka, minimal 6 karakter
+
+  // Validasi input
+  if (_emailController.text.isEmpty || 
+      _passwordController.text.isEmpty || 
       _confirmDeleteController.text.isEmpty) {
     Get.snackbar(
       'Error',
       'Please fill in all fields',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.redAccent,
+      colorText: Colors.white,
+    );
+    return;
+  }
+
+  // Validasi email
+  if (!emailPattern.hasMatch(_emailController.text)) {
+    Get.snackbar(
+      'Error',
+      'Email must be a valid Gmail address (e.g., example@gmail.com)',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.redAccent,
+      colorText: Colors.white,
+    );
+    return;
+  }
+
+  // Validasi password
+  if (!passwordPattern.hasMatch(_passwordController.text)) {
+    Get.snackbar(
+      'Error',
+      'Password must contain only letters and numbers and be at least 6 characters long',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.redAccent,
       colorText: Colors.white,
@@ -102,7 +112,7 @@ class _DeleteaccViewState extends State<DeleteaccView> {
       // Hapus dokumen pengguna dari Firestore
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(currentUser.uid)  // Menggunakan UID pengguna yang sedang login
+          .doc(currentUser.uid) // Menggunakan UID pengguna yang sedang login
           .delete();
 
       // Tampilkan dialog berhasil
@@ -193,10 +203,22 @@ class _DeleteaccViewState extends State<DeleteaccView> {
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              radius: 20,
-              backgroundImage: AssetImage(urlImage ?? defaultImage),
-            ),
+            child:  Obx(() {
+              final imagePath = profileController.selectedImagePath.value;
+
+              return CircleAvatar(
+                radius: 20,
+                backgroundImage: imagePath.startsWith('http')
+                    ? NetworkImage(imagePath)
+                    : (File(imagePath).existsSync()
+                        ? FileImage(File(imagePath))
+                        : AssetImage('assets/pp5.jpg')) as ImageProvider,
+                onBackgroundImageError: (_, __) {
+                  // Jika gambar gagal, gunakan fallback
+                  profileController.selectedImagePath.value = 'assets/pp5.jpg';
+                },
+              );
+            }),
           ),
         ],
       ),

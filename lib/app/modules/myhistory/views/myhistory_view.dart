@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:myapp/app/modules/profile/controllers/profile_controller.dart';
 
 import 'package:myapp/app/routes/app_pages.dart';
 
@@ -16,34 +19,9 @@ class _MyhistoryViewState extends State<MyhistoryView> {
   final String userUid = FirebaseAuth.instance.currentUser!.uid;
    String? urlImage; // Variabel untuk menyimpan URL gambar pengguna
   final String defaultImage = 'assets/LOGO.png';
+  final ProfileController profileController = Get.put(ProfileController());
     
   
-  @override
-  void initState() {
-    super.initState();
-    fetchUserImage(); // Initial calculation of total amount
-  }
-
-  // Fungsi untuk mengambil data pengguna berdasarkan UID
-  Future<void> fetchUserImage() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
-      if (userDoc.exists) {
-        setState(() {
-          urlImage = userDoc.data()?['urlImage'] ?? defaultImage;
-        });
-      } else {
-        setState(() {
-          urlImage = defaultImage;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
 
@@ -81,10 +59,22 @@ class _MyhistoryViewState extends State<MyhistoryView> {
          actions: [
   Padding(
     padding: const EdgeInsets.all(8.0),
-    child: CircleAvatar(
-      radius: 20,
-      backgroundImage: AssetImage(urlImage ?? defaultImage),
-    ),
+    child: Obx(() {
+              final imagePath = profileController.selectedImagePath.value;
+
+              return CircleAvatar(
+                radius: 20,
+                backgroundImage: imagePath.startsWith('http')
+                    ? NetworkImage(imagePath)
+                    : (File(imagePath).existsSync()
+                        ? FileImage(File(imagePath))
+                        : AssetImage('assets/pp5.jpg')) as ImageProvider,
+                onBackgroundImageError: (_, __) {
+                  // Jika gambar gagal, gunakan fallback
+                  profileController.selectedImagePath.value = 'assets/pp5.jpg';
+                },
+              );
+            }),
   ),
 ],
       ),
@@ -604,10 +594,29 @@ class _MyhistoryViewState extends State<MyhistoryView> {
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 10),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(imageUrl,
-                        width: 250, height: 150, fit: BoxFit.cover),
-                  ),
+  borderRadius: BorderRadius.circular(10), // Rounded corners for the image
+  child: (imageUrl).startsWith('http')
+      ? Image.network(
+          imageUrl, // Jika URL valid
+          width: 250,
+          height: 150,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Image.asset(
+              'assets/default.png', // Fallback jika gagal memuat URL
+              width: 250,
+              height: 150,
+              fit: BoxFit.cover,
+            );
+          },
+        )
+      : Image.asset(
+          imageUrl.isNotEmpty ? imageUrl : 'assets/default.png', // Gunakan aset lokal jika bukan URL
+          width: 250,
+          height: 150,
+          fit: BoxFit.cover,
+        ),
+),
                 ),
                 Text(
                   "Location: ${data['location'] ?? 'N/A'}",

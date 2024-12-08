@@ -32,7 +32,7 @@ apply plugin: 'com.google.gms.google-services' // Google Services plugin
 
 android {
     namespace = "com.example.myapp"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 34
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -51,6 +51,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+        multiDexEnabled true
     }
 
     buildTypes {

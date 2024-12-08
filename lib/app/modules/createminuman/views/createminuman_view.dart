@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:myapp/app/routes/app_pages.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CreateminumanView extends StatefulWidget {
   final bool isEdit;
@@ -27,6 +31,7 @@ class _CreateminumanViewState extends State<CreateminumanView> {
   bool isLoading = false;
   bool status = true;
   String? selectedLocation;
+  File? selectedImageFile;
 
   final List<String> locations = [
     'Pasar Tambak Rejo, Surabaya',
@@ -74,30 +79,35 @@ class _CreateminumanViewState extends State<CreateminumanView> {
   }
 
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-  title: Text(
-    widget.isEdit ? 'Edit Coffee Drink Menu' : 'Add Coffee Drink Menu',
-    textAlign: TextAlign.left,
-    style: TextStyle(color: Colors.white), // Mengatur warna teks menjadi putih
-  ),
-  backgroundColor: Colors.teal,
-  centerTitle: false,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.only(
-      bottomLeft: Radius.circular(20), 
-      bottomRight: Radius.circular(20),
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.white,
+    appBar: AppBar(
+      title: Text(
+        widget.isEdit ? 'Edit Coffee Drink Menu' : 'Add Coffee Drink Menu',
+        textAlign: TextAlign.left,
+        style: TextStyle(color: Colors.white),
+      ),
+      backgroundColor: Colors.teal,
+      centerTitle: false,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(20),
+        ),
+      ),
+      automaticallyImplyLeading: false,
     ),
-  ),
-  automaticallyImplyLeading: false,
-),
-
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
+    body: SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[300], // Warna latar belakang abu-abu
+            borderRadius: BorderRadius.circular(15), // Radius untuk sudut
+          ),
+          padding: const EdgeInsets.all(16.0), // Padding di dalam Container
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -150,9 +160,11 @@ class _CreateminumanViewState extends State<CreateminumanView> {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(), // This should remain as you have it
-    );
-  }
+    ),
+    bottomNavigationBar: _buildBottomNavigationBar(), // Bottom navigation tetap seperti sebelumnya
+  );
+}
+
 
   Widget _buildTextField(TextEditingController controller, String label, bool isNumeric, {TextInputType keyboardType = TextInputType.text}) {
     return TextField(
@@ -206,12 +218,12 @@ class _CreateminumanViewState extends State<CreateminumanView> {
 
   Widget _buildImageUrlField() {
     return GestureDetector(
-      onTap: _showImageSelectionDialog,
+      onTap: () => _pickImage(context),
       child: AbsorbPointer(
         child: TextField(
           controller: controllerImageUrl,
           decoration: InputDecoration(
-            labelText: 'Image URL',
+            labelText: 'Gambar Produk',
             labelStyle: TextStyle(color: Colors.teal),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30.0),
@@ -228,81 +240,115 @@ class _CreateminumanViewState extends State<CreateminumanView> {
     );
   }
 
-  void _showImageSelectionDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Choose One'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  controllerImageUrl.text = 'assets/M1.png';
-                  Navigator.of(context).pop();
-                },
-                child: Row(
+  void _pickImage(BuildContext context) {
+  _showImageSourceDialog(context);
+}
+
+void pickImage(ImageSource source) async {
+  try {
+    final picker = ImagePicker();
+
+    // Ambil gambar dari sumber yang dipilih
+    final pickedFile = await picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      setState(() {
+        selectedImageFile = File(pickedFile.path); // Update file yang dipilih
+        controllerImageUrl.text = pickedFile.path; // Tampilkan path lokal
+      });
+    } else {
+      Get.snackbar('Error', 'No image selected');
+    }
+  } catch (e) {
+    print('Error picking image: $e');
+    Get.snackbar('Error', 'Failed to pick an image');
+  }
+}
+
+void _showImageSourceDialog(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (BuildContext context) {
+      return Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Choose Image Source',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Column(
                   children: [
-                    Image.asset('assets/M1.png', width: 50, height: 50),
-                    SizedBox(width: 10),
-                    Text('Kopi Susu Reguler'),
+                    IconButton(
+                      icon: Icon(Icons.photo_library, color: Colors.teal, size: 40),
+                      onPressed: () {
+                        Navigator.pop(context); // Tutup dialog
+                        pickImage(ImageSource.gallery); // Pilih galeri
+                      },
+                    ),
+                    Text('Gallery', style: TextStyle(fontSize: 16)),
                   ],
                 ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  controllerImageUrl.text = 'assets/M2.png';
-                  Navigator.of(context).pop();
-                },
-                child: Row(
+                Column(
                   children: [
-                    Image.asset('assets/M2.png', width: 50, height: 50),
-                    SizedBox(width: 10),
-                    Text('Kopi Susu Gula Aren'),
+                    IconButton(
+                      icon: Icon(Icons.camera_alt, color: Colors.teal, size: 40),
+                      onPressed: () {
+                        Navigator.pop(context); // Tutup dialog
+                        pickImage(ImageSource.camera); // Pilih kamera
+                      },
+                    ),
+                    Text('Camera', style: TextStyle(fontSize: 16)),
                   ],
                 ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  controllerImageUrl.text = 'assets/M3.png';
-                  Navigator.of(context).pop();
-                },
-                child: Row(
-                  children: [
-                    Image.asset('assets/M3.png', width: 50, height: 50),
-                    SizedBox(width: 10),
-                    Text('Creamy Signature'),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  controllerImageUrl.text = 'assets/M4.png';
-                  Navigator.of(context).pop();
-                },
-                child: Row(
-                  children: [
-                    Image.asset('assets/M4.png', width: 50, height: 50),
-                    SizedBox(width: 10),
-                    Text('Chocolate'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
+              ],
             ),
           ],
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
+}
+
+
+
+Future<String?> uploadImageToSupabase(File imageFile) async {
+  try {
+    final supabase = Supabase.instance.client;
+
+    // Read the image bytes
+    final fileBytes = await imageFile.readAsBytes();
+
+    // Generate a sanitized version of the name from the TextField
+    final sanitizedControllerName = controllerName.text.replaceAll(RegExp(r'[^\w\s]'), '').replaceAll(' ', '_');
+
+    // Generate a unique file name based on the sanitized name and current timestamp
+    final String fileName = '$sanitizedControllerName-${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+    // Upload the file to Supabase Storage bucket 'minuman_pictures'
+    await supabase.storage.from('minuman_pictures').uploadBinary(fileName, fileBytes);
+
+    // Generate the public URL for the uploaded image
+    final publicUrl = supabase.storage.from('minuman_pictures').getPublicUrl(fileName);
+    print("Uploaded Image URL: $publicUrl");
+
+    return publicUrl;
+
+  } catch (e) {
+    print('Error uploading image: $e');
+    Get.snackbar('Error', 'Failed to upload image');
+    return null;
   }
+}
+
 
   Widget _buildSaveButton() {
   return SizedBox(
@@ -325,62 +371,197 @@ class _CreateminumanViewState extends State<CreateminumanView> {
   );
 }
 
-  void _saveData() async {
-  if (controllerName.text.isNotEmpty &&
-      controllerDescription.text.isNotEmpty &&
-      controllerPriceLarge.text.isNotEmpty &&
-      controllerPriceSmall.text.isNotEmpty &&
-      selectedLocation != null) {
-    setState(() {
-      isLoading = true;
-    });
+void _saveData() async {
+  final supabase = Supabase.instance.client;
 
-    try {
-      if (widget.isEdit) {
-        await firestore.collection('minuman').doc(widget.documentId).update({
-          'name': controllerName.text,
-          'description': controllerDescription.text,
-          'location': selectedLocation,
-          'hargalarge': double.parse(controllerPriceLarge.text),
-          'hargasmall': double.parse(controllerPriceSmall.text),
-          'status': status,
-          'imageUrl': controllerImageUrl.text,
+  // Validasi input menggunakan regex
+  final namePattern = RegExp(r'^[a-zA-Z0-9\s]+$');
+  final descriptionPattern = RegExp(r'^[a-zA-Z0-9\s]+$');
+  final pricePattern = RegExp(r'^\d+(\.\d+)?$');
+
+  if (controllerName.text.isEmpty ||
+      controllerDescription.text.isEmpty ||
+      controllerPriceLarge.text.isEmpty ||
+      controllerPriceSmall.text.isEmpty ||
+      selectedLocation == null) {
+    Get.snackbar(
+      'Error',
+      'Please fill in all fields',
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+    return;
+  }
+
+  if (!namePattern.hasMatch(controllerName.text)) {
+    Get.snackbar(
+      'Error',
+      'Name can only contain letters and numbers',
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+    return;
+  }
+
+  if (!descriptionPattern.hasMatch(controllerDescription.text)) {
+    Get.snackbar(
+      'Error',
+      'Description can only contain letters and numbers',
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+    return;
+  }
+
+  if (!pricePattern.hasMatch(controllerPriceLarge.text) ||
+      !pricePattern.hasMatch(controllerPriceSmall.text)) {
+    Get.snackbar(
+      'Error',
+      'Price must be a valid number',
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+    return;
+  }
+
+  setState(() {
+    isLoading = true;
+  });
+
+  try {
+    // Cek duplikasi nama di Firestore
+    final querySnapshot = await firestore
+        .collection('minuman')
+        .where('name', isEqualTo: controllerName.text)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      if (!widget.isEdit || (widget.isEdit && querySnapshot.docs.first.id != widget.documentId)) {
+        Get.snackbar(
+          'Error',
+          'Name already exists in the collection',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        setState(() {
+          isLoading = false;
         });
-      } else {
-        await firestore.collection('minuman').add({
-          'name': controllerName.text,
-          'description': controllerDescription.text,
-          'location': selectedLocation,
-          'hargalarge': double.parse(controllerPriceLarge.text),
-          'hargasmall': double.parse(controllerPriceSmall.text),
-          'status': status,
-          'imageUrl': controllerImageUrl.text,
-        });
+        return;
+      }
+    }
+
+    // Upload gambar jika diperlukan
+    String? finalImageUrl = controllerImageUrl.text;
+
+    if (widget.isEdit && selectedImageFile != null) {
+      // Sanitasi nama file
+      final sanitizedControllerName = controllerName.text
+          .replaceAll(RegExp(r'[^\w\s]'), '')
+          .replaceAll(' ', '_');
+
+      // List file yang ada di bucket Supabase
+      final response = await supabase.storage.from('minuman_pictures').list();
+      final existingFiles = response.map((file) => file.name).toList();
+
+      // Cari dan hapus file lama berdasarkan nama
+      for (var fileName in existingFiles) {
+        if (fileName.startsWith('$sanitizedControllerName-')) {
+          try {
+            await supabase.storage.from('minuman_pictures').remove([fileName]);
+            print("Deleted old file: $fileName");
+          } catch (e) {
+            print("Error deleting file: $e");
+            Get.snackbar(
+              'Error',
+              'Failed to delete old image',
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
+            setState(() {
+              isLoading = false;
+            });
+            return;
+          }
+        }
       }
 
-      // Success snackbar
-      Get.snackbar(
-        'Success',
-        'Data saved successfully',
-        backgroundColor: Colors.green, // Green background
-        colorText: Colors.white, // White text
-        snackPosition: SnackPosition.BOTTOM, // Position of the snackbar
-      );
-
-      // Navigate back after saving
-      Get.offAllNamed(Routes.ADMINHOME);
-    } catch (e) {
-      // Handle error
-      Get.snackbar('Error', 'Failed to save data: $e');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
+      // Upload file baru
+      finalImageUrl = await uploadImageToSupabase(selectedImageFile!);
+      if (finalImageUrl == null) {
+        Get.snackbar(
+          'Error',
+          'Failed to upload new image',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
     }
-  } else {
-    Get.snackbar('Error', 'Please fill in all fields');
+
+    if (!widget.isEdit && selectedImageFile != null) {
+        finalImageUrl = await uploadImageToSupabase(selectedImageFile!);
+        if (finalImageUrl == null) {
+          Get.snackbar(
+            'Error',
+            'Failed to upload new image',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+          setState(() {
+            isLoading = false;
+          });
+          return;
+        }
+      }
+
+    // Data yang akan disimpan
+    final data = {
+      'name': controllerName.text,
+      'description': controllerDescription.text,
+      'location': selectedLocation,
+      'hargalarge': double.parse(controllerPriceLarge.text),
+      'hargasmall': double.parse(controllerPriceSmall.text),
+      'status': status,
+      'imageUrl': finalImageUrl, // URL final setelah upload
+    };
+
+    if (widget.isEdit) {
+      await firestore.collection('minuman').doc(widget.documentId).update(data);
+    } else {
+      await firestore.collection('minuman').add(data);
+    }
+
+    Get.snackbar(
+      'Success',
+      'Data saved successfully',
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+    Get.offAllNamed(Routes.ADMINHOME);
+  } catch (e) {
+    Get.snackbar(
+      'Error',
+      'Failed to save data: $e',
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
   }
 }
+
+
+
+
+
+
+
 
 
   Widget _buildBottomNavigationBar() {

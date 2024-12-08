@@ -553,9 +553,7 @@ class AdminorderView extends StatelessWidget{
 
 // This is your existing function to show item details
   void _showItemDetailDialog(BuildContext context, Map<String, dynamic> data) {
-    String imageUrl = data['imageUrl'] ??
-        'assets/default.png'; // Default image if not available
-
+    // Default image if not available
     showDialog(
       context: context,
       builder: (context) {
@@ -579,10 +577,19 @@ class AdminorderView extends StatelessWidget{
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 10),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(imageUrl,
-                        width: 250, height: 150, fit: BoxFit.cover),
-                  ),
+  borderRadius: BorderRadius.circular(15),
+  child: Image(
+    image: (data['imageUrl'] ?? '').startsWith('http')
+        ? NetworkImage(data['imageUrl']) // Gunakan NetworkImage untuk URL
+        : AssetImage('assets/default.png') as ImageProvider, // Gunakan AssetImage jika bukan URL
+    height: 150,
+    width: 250,
+    fit: BoxFit.cover,
+    errorBuilder: (context, error, stackTrace) {
+      return Image.asset('assets/default.png'); // Fallback image jika gagal
+    },
+  ),
+),
                 ),
                 Text(
                   "Location: ${data['location'] ?? 'N/A'}",

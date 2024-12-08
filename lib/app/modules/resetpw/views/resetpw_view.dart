@@ -1,7 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/profile/controllers/profile_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 
 class ResetpwView extends StatefulWidget {
@@ -12,43 +15,48 @@ class ResetpwView extends StatefulWidget {
 class _ResetpwViewState extends State<ResetpwView> {
   String? urlImage; // Variabel untuk menyimpan URL gambar pengguna
   final String defaultImage = 'assets/LOGO.png';
+  final ProfileController profileController = Get.put(ProfileController());
   
-  @override
-  void initState() {
-    super.initState();
-    fetchUserImage();
-  }
-
-  Future<void> fetchUserImage() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
-      if (userDoc.exists) {
-        setState(() {
-          urlImage = userDoc.data()?['urlImage'] ?? defaultImage;
-        });
-      } else {
-        setState(() {
-          urlImage = defaultImage;
-        });
-      }
-    }
-  }
+  
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _oldPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
 
   void _resetPassword() async {
-  if (_emailController.text.isEmpty ||
-      _oldPasswordController.text.isEmpty ||
-      _newPasswordController.text.isEmpty) {
+  // Regex untuk validasi email dan password
+  final emailPattern = RegExp(r'^[a-zA-Z0-9._%+-]+@gmail\.com$'); // Validasi email harus @gmail.com
+  final passwordPattern = RegExp(r'^[a-zA-Z0-9]{6,}$'); // Hanya huruf dan angka, minimal 6 karakter
+
+  // Validasi email
+  if (_emailController.text.isEmpty || !emailPattern.hasMatch(_emailController.text)) {
     Get.snackbar(
       'Error',
-      'Please fill in all fields',
+      'Email must be a valid Gmail address (e.g., example@gmail.com)',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.redAccent,
+      colorText: Colors.white,
+    );
+    return;
+  }
+
+  // Validasi old password
+  if (_oldPasswordController.text.isEmpty || !passwordPattern.hasMatch(_oldPasswordController.text)) {
+    Get.snackbar(
+      'Error',
+      'Old password must contain only letters and numbers and be at least 6 characters long',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.redAccent,
+      colorText: Colors.white,
+    );
+    return;
+  }
+
+  // Validasi new password
+  if (_newPasswordController.text.isEmpty || !passwordPattern.hasMatch(_newPasswordController.text)) {
+    Get.snackbar(
+      'Error',
+      'New password must contain only letters and numbers and be at least 6 characters long',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.redAccent,
       colorText: Colors.white,
@@ -61,17 +69,16 @@ class _ResetpwViewState extends State<ResetpwView> {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser != null && currentUser.email == _emailController.text) {
-      // Verifikasi email dan old password yang dimasukkan
-      // Menggunakan re-authentication untuk memastikan password lama benar
+      // Verifikasi email dan old password
       final authCredential = EmailAuthProvider.credential(
         email: _emailController.text,
         password: _oldPasswordController.text,
       );
 
-      // Re-authenticate pengguna untuk memverifikasi old password
+      // Re-authenticate pengguna
       await currentUser.reauthenticateWithCredential(authCredential);
 
-      // Jika re-authentication berhasil, perbarui password
+      // Perbarui password
       await currentUser.updatePassword(_newPasswordController.text);
 
       // Tampilkan dialog berhasil
@@ -136,6 +143,7 @@ class _ResetpwViewState extends State<ResetpwView> {
 
 
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -164,10 +172,22 @@ class _ResetpwViewState extends State<ResetpwView> {
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              radius: 20,
-              backgroundImage: AssetImage(urlImage ?? defaultImage),
-            ),
+            child: Obx(() {
+              final imagePath = profileController.selectedImagePath.value;
+
+              return CircleAvatar(
+                radius: 20,
+                backgroundImage: imagePath.startsWith('http')
+                    ? NetworkImage(imagePath)
+                    : (File(imagePath).existsSync()
+                        ? FileImage(File(imagePath))
+                        : AssetImage('assets/pp5.jpg')) as ImageProvider,
+                onBackgroundImageError: (_, __) {
+                  // Jika gambar gagal, gunakan fallback
+                  profileController.selectedImagePath.value = 'assets/pp5.jpg';
+                },
+              );
+            }),
           ),
         ],
       ),

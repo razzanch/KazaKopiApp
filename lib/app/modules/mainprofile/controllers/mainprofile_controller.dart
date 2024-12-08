@@ -8,7 +8,8 @@ class MainprofileController extends GetxController {
   var phoneNumber = ''.obs;
   var uid = ''.obs;
   var profileImageUrl = ''.obs;
-  var lastUpdate = ''.obs;  // Add lastUpdate observable
+  var lastUpdate = ''.obs;
+  var selectedImagePath = ''.obs; // Path untuk gambar yang dipilih
 
   @override
   void onInit() {
@@ -31,6 +32,11 @@ class MainprofileController extends GetxController {
           phoneNumber.value = data['phoneNumber'] ?? '';
           uid.value = data['uid'] ?? '';
           profileImageUrl.value = data['urlImage'] ?? '';
+
+          // Menyimpan path gambar yang dipilih atau fallback image
+          selectedImagePath.value = profileImageUrl.value.isNotEmpty
+              ? profileImageUrl.value
+              : 'assets/pp5.jpg';
 
           // Fetch and format lastUpdate field
           if (data['lastUpdate'] != null) {
