@@ -32,6 +32,14 @@ abstract class Routes {
   static const ARTICLE_DETAIL = _Paths.ARTICLE_DETAIL;
   static const ARTICLE_DETAIL_WEBVIEW = _Paths.ARTICLE_DETAIL_WEBVIEW;
   static const OURLOCATION = _Paths.OURLOCATION;
+  static const ADMINHELPCENTER = _Paths.ADMINHELPCENTER;
+  static const ADMINFAQ = _Paths.ADMINFAQ;
+  static const ADMINREPORT = _Paths.ADMINREPORT;
+  static const FAQ = _Paths.FAQ;
+  static const REPORT = _Paths.REPORT;
+  static const ADMINVOUCHER = _Paths.ADMINVOUCHER;
+  static const ADMINLISTVC = _Paths.ADMINLISTVC;
+  static const CONNECTION = _Paths.CONNECTION;
 }
 
 abstract class _Paths {
@@ -64,4 +72,12 @@ abstract class _Paths {
   static const ARTICLE_DETAIL = '/article-detail';
   static const ARTICLE_DETAIL_WEBVIEW = '/article-detail-webview';
   static const OURLOCATION = '/ourlocation';
+  static const ADMINHELPCENTER = '/adminhelpcenter';
+  static const ADMINFAQ = '/adminfaq';
+  static const ADMINREPORT = '/adminreport';
+  static const FAQ = '/faq';
+  static const REPORT = '/report';
+  static const ADMINVOUCHER = '/adminvoucher';
+  static const ADMINLISTVC = '/adminlistvc';
+  static const CONNECTION = '/connection';
 }

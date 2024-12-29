@@ -171,36 +171,38 @@ class LoginView extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(height: 5),
-                              Obx(() => ElevatedButton(
-                                    onPressed: controller.isLoading.value
-                                        ? null
-                                        : () async {
-                                            String email = emailController.text;
-                                            String password =
-                                                passwordController.text;
+                              Obx(
+  () => SizedBox(
+    width: double.infinity, // Tombol selebar layar
+    child: ElevatedButton(
+      onPressed: controller.isLoading.value
+          ? null
+          : () async {
+              String email = emailController.text;
+              String password = passwordController.text;
 
-                                            bool success = await controller
-                                                .loginUser(email, password);
-                                            if (success) {
-                                              await showNotification(); // Tampilkan notifikasi hanya jika login berhasil
-                                            }
-                                          },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.grey[800],
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 50, vertical: 15),
-                                    ),
-                                    child: controller.isLoading.value
-                                        ? CircularProgressIndicator(
-                                            color: Colors.white)
-                                        : Text(
-                                            'Login',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                  )),
+              bool success = await controller.loginUser(email, password);
+              if (success) {
+                await showNotification(); // Tampilkan notifikasi hanya jika login berhasil
+              }
+            },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.grey[800],
+        padding: const EdgeInsets.symmetric(vertical: 15),
+      ),
+      child: controller.isLoading.value
+          ? const CircularProgressIndicator(color: Colors.white)
+          : const Text(
+              'Login',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+    ),
+  ),
+),
+
                               SizedBox(height: 5),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,

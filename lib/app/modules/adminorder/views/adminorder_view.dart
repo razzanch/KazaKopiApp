@@ -5,8 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:myapp/app/modules/login/controllers/login_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 
-class AdminorderView extends StatelessWidget{
-   final LoginController loginController = Get.put(LoginController());
+class AdminorderView extends StatelessWidget {
+  final LoginController loginController = Get.put(LoginController());
 
   @override
   Widget build(BuildContext context) {
@@ -14,33 +14,37 @@ class AdminorderView extends StatelessWidget{
 
     return Scaffold(
       appBar: AppBar(
-  backgroundColor: Colors.teal,
-  elevation: 0,
-  shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+        backgroundColor: Colors.teal,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20)),
         ),
-  automaticallyImplyLeading: false, // Disable default back button
-  title: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        "Order Management",
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),
+        automaticallyImplyLeading: false, // Disable default back button
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Order Management",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout,
+                color: Colors.red), // Icon logout berwarna merah
+            onPressed: () {
+              // Memanggil metode logout dari LoginController
+              loginController.logout();
+            },
+          ),
+        ],
       ),
-    ],
-  ),
-  actions: [
-    IconButton(
-      icon: Icon(Icons.logout, color: Colors.red), // Icon logout berwarna merah
-      onPressed: () {
-        // Memanggil metode logout dari LoginController
-        loginController.logout();
-      },
-    ),
-  ],
-),
-
-
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,7 +61,8 @@ class AdminorderView extends StatelessWidget{
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(12),
               ),
-              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              margin:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               padding: const EdgeInsets.all(8.0),
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
@@ -86,7 +91,8 @@ class AdminorderView extends StatelessWidget{
                     physics: NeverScrollableScrollPhysics(),
                     itemCount: snapshot.data!.docs.length,
                     itemBuilder: (context, index) {
-                      var orderData = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                      var orderData = snapshot.data!.docs[index].data()
+                          as Map<String, dynamic>;
 
                       return Card(
                         margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -100,30 +106,39 @@ class AdminorderView extends StatelessWidget{
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'Order ID: ${orderData['idorder'] ?? 'N/A'}',
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                   GestureDetector(
-                                    onTap: () => _showOrderItemsDialog(orderData['items']),
-                                    child: Icon(Icons.receipt, color: Colors.teal),
+                                    onTap: () => _showOrderItemsDialog(
+                                        orderData['items']),
+                                    child:
+                                        Icon(Icons.receipt, color: Colors.teal),
                                   ),
                                 ],
                               ),
                               Divider(),
                               ListTile(
-                                leading: Icon(Icons.payment, color: Colors.teal),
+                                leading:
+                                    Icon(Icons.payment, color: Colors.teal),
                                 title: Text('Payment Method'),
-                                subtitle: Text(orderData['paymentMethod'] ?? 'N/A'),
+                                subtitle:
+                                    Text(orderData['paymentMethod'] ?? 'N/A'),
                               ),
                               ListTile(
-                                leading: Icon(Icons.attach_money, color: Colors.teal),
+                                leading: Icon(Icons.attach_money,
+                                    color: Colors.teal),
                                 title: Text('Total Amount'),
                                 subtitle: Text(
                                   orderData['totalAmount'] != null
-                                      ? "Rp " + orderData['totalAmount'].toString()
+                                      ? "Rp " +
+                                          orderData['totalAmount'].toString()
                                       : 'N/A',
                                 ),
                               ),
@@ -135,166 +150,227 @@ class AdminorderView extends StatelessWidget{
                               ListTile(
                                 leading: Icon(Icons.phone, color: Colors.teal),
                                 title: Text('Phone'),
-                                subtitle: Text(orderData['phoneNumber'] ?? 'N/A'),
+                                subtitle:
+                                    Text(orderData['phoneNumber'] ?? 'N/A'),
                               ),
-                             ListTile(
-  leading: Icon(Icons.calendar_today, color: Colors.teal),
-  title: Text('Order Date'),
-  subtitle: Text(
-    orderData['date'] != null
-        ? DateFormat.yMMMd().add_j().format(
-            (orderData['date'] is Timestamp
-                ? (orderData['date'] as Timestamp).toDate()
-                : orderData['date']) as DateTime)
-        : 'N/A',
-  ),
-)
-,
+                              ListTile(
+                                leading: Icon(Icons.calendar_today,
+                                    color: Colors.teal),
+                                title: Text('Order Date'),
+                                subtitle: Text(
+                                  orderData['date'] != null
+                                      ? DateFormat.yMMMd().add_j().format(
+                                          (orderData['date'] is Timestamp
+                                              ? (orderData['date'] as Timestamp)
+                                                  .toDate()
+                                              : orderData['date']) as DateTime)
+                                      : 'N/A',
+                                ),
+                              ),
                               Padding(
-  padding: const EdgeInsets.symmetric(vertical: 8.0),
-  child: Column(
-    children: [
-      Container(
-        alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: _getStatusColor(orderData['status']),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          orderData['status'] ?? 'N/A',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-      if (orderData['status'] == 'Order Received') ...[
-        Row(
-          children: [
-            Expanded(
-  child: ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.red,
-      padding: EdgeInsets.symmetric(vertical: 8), // Mengurangi tinggi tombol
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8), // Mengatur border radius
-      ),
-    ),
-    onPressed: () async {
-      // Ambil dokumen order berdasarkan idorder
-      DocumentSnapshot orderDoc = await FirebaseFirestore.instance
-          .collection('order')
-          .doc(orderData['idorder'])
-          .get();
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      alignment: Alignment.center,
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: _getStatusColor(
+                                            orderData['status']),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        orderData['status'] ?? 'N/A',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                    if (orderData['status'] ==
+                                        'Order Received') ...[
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.red,
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical:
+                                                        8), // Mengurangi tinggi tombol
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8), // Mengatur border radius
+                                                ),
+                                              ),
+                                              onPressed: () async {
+                                                // Ambil dokumen order berdasarkan idorder
+                                                DocumentSnapshot orderDoc =
+                                                    await FirebaseFirestore
+                                                        .instance
+                                                        .collection('order')
+                                                        .doc(orderData[
+                                                            'idorder'])
+                                                        .get();
 
-      if (orderDoc.exists) {
-        // Pindahkan data ke koleksi historyorder
-        await FirebaseFirestore.instance.collection('historyorder').doc(orderData['idorder']).set(orderDoc.data() as Map<String, dynamic>);
+                                                if (orderDoc.exists) {
+                                                  // Pindahkan data ke koleksi historyorder
+                                                  await FirebaseFirestore
+                                                      .instance
+                                                      .collection(
+                                                          'historyorder')
+                                                      .doc(orderData['idorder'])
+                                                      .set(orderDoc.data()
+                                                          as Map<String,
+                                                              dynamic>);
 
-        // Hapus dokumen dari koleksi order
-        await FirebaseFirestore.instance.collection('order').doc(orderData['idorder']).delete();
-        
-        // Memperbarui status menjadi 'Cancelled' pada koleksi historyorder
-        await FirebaseFirestore.instance.collection('historyorder').doc(orderData['idorder']).update({'status': 'Cancelled'});
-      }
-    },
-    child: Text(
-      'Cancel',
-      style: TextStyle(color: Colors.white),
-    ),
-  ),
-),
+                                                  // Hapus dokumen dari koleksi order
+                                                  await FirebaseFirestore
+                                                      .instance
+                                                      .collection('order')
+                                                      .doc(orderData['idorder'])
+                                                      .delete();
 
-            SizedBox(width: 8), // Jarak antara tombol Cancel dan Accept
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 107, 235, 111),
-                  padding: EdgeInsets.symmetric(vertical: 8), // Mengurangi tinggi tombol
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // Mengatur border radius
-                  ),
-                ),
-                onPressed: () {
-                  FirebaseFirestore.instance
-                      .collection('order')
-                      .doc(orderData['idorder'])
-                      .update({'status': 'Being Prepared'});
-                },
-                child: Text(
-                  'Accept',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ] else if (orderData['status'] == 'Being Prepared') ...[
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
-              padding: EdgeInsets.symmetric(vertical: 8), // Mengurangi tinggi tombol
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8), // Mengatur border radius
-              ),
-            ),
-            onPressed: () {
-              FirebaseFirestore.instance
-                  .collection('order')
-                  .doc(orderData['idorder'])
-                  .update({'status': 'Ready for Pickup'});
-            },
-            child: Text(
-              'Ready for Pickup',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ),
-      ] else if (orderData['status'] == 'Ready for Pickup') ...[
-  SizedBox(
-    width: double.infinity,
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.black,
-        padding: EdgeInsets.symmetric(vertical: 4), // Mengurangi tinggi tombol
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8), // Mengatur border radius
-        ),
-      ),
-      onPressed: () async {
-        // Ambil dokumen order berdasarkan idorder
-        DocumentSnapshot orderDoc = await FirebaseFirestore.instance
-            .collection('order')
-            .doc(orderData['idorder'])
-            .get();
+                                                  // Memperbarui status menjadi 'Cancelled' pada koleksi historyorder
+                                                  await FirebaseFirestore
+                                                      .instance
+                                                      .collection(
+                                                          'historyorder')
+                                                      .doc(orderData['idorder'])
+                                                      .update({
+                                                    'status': 'Cancelled'
+                                                  });
+                                                }
+                                              },
+                                              child: Text(
+                                                'Cancel',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                          ),
 
-        if (orderDoc.exists) {
-          // Pindahkan data ke koleksi historyorder
-          await FirebaseFirestore.instance.collection('historyorder').doc(orderData['idorder']).set(orderDoc.data() as Map<String, dynamic>);
+                                          SizedBox(
+                                              width:
+                                                  8), // Jarak antara tombol Cancel dan Accept
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    const Color.fromARGB(
+                                                        255, 107, 235, 111),
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical:
+                                                        8), // Mengurangi tinggi tombol
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8), // Mengatur border radius
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                FirebaseFirestore.instance
+                                                    .collection('order')
+                                                    .doc(orderData['idorder'])
+                                                    .update({
+                                                  'status': 'Being Prepared'
+                                                });
+                                              },
+                                              child: Text(
+                                                'Accept',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ] else if (orderData['status'] ==
+                                        'Being Prepared') ...[
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.teal,
+                                            padding: EdgeInsets.symmetric(
+                                                vertical:
+                                                    8), // Mengurangi tinggi tombol
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                  8), // Mengatur border radius
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            FirebaseFirestore.instance
+                                                .collection('order')
+                                                .doc(orderData['idorder'])
+                                                .update({
+                                              'status': 'Ready for Pickup'
+                                            });
+                                          },
+                                          child: Text(
+                                            'Ready for Pickup',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        ),
+                                      ),
+                                    ] else if (orderData['status'] ==
+                                        'Ready for Pickup') ...[
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.black,
+                                            padding: EdgeInsets.symmetric(
+                                                vertical:
+                                                    4), // Mengurangi tinggi tombol
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                  8), // Mengatur border radius
+                                            ),
+                                          ),
+                                          onPressed: () async {
+                                            // Ambil dokumen order berdasarkan idorder
+                                            DocumentSnapshot orderDoc =
+                                                await FirebaseFirestore.instance
+                                                    .collection('order')
+                                                    .doc(orderData['idorder'])
+                                                    .get();
 
-          // Hapus dokumen dari koleksi order
-          await FirebaseFirestore.instance.collection('order').doc(orderData['idorder']).delete();
-          
-          // Memperbarui status menjadi 'Picked Up' pada koleksi historyorder
-          await FirebaseFirestore.instance.collection('historyorder').doc(orderData['idorder']).update({'status': 'Picked Up'});
-        }
-      },
-      child: Text(
-        'Picked Up',
-        style: TextStyle(color: Colors.white),
-      ),
-    ),
-  ),
-],
+                                            if (orderDoc.exists) {
+                                              // Pindahkan data ke koleksi historyorder
+                                              await FirebaseFirestore.instance
+                                                  .collection('historyorder')
+                                                  .doc(orderData['idorder'])
+                                                  .set(orderDoc.data()
+                                                      as Map<String, dynamic>);
 
-    ],
-  ),
-),
+                                              // Hapus dokumen dari koleksi order
+                                              await FirebaseFirestore.instance
+                                                  .collection('order')
+                                                  .doc(orderData['idorder'])
+                                                  .delete();
 
-
-
-
-
+                                              // Memperbarui status menjadi 'Picked Up' pada koleksi historyorder
+                                              await FirebaseFirestore.instance
+                                                  .collection('historyorder')
+                                                  .doc(orderData['idorder'])
+                                                  .update(
+                                                      {'status': 'Picked Up'});
+                                            }
+                                          },
+                                          child: Text(
+                                            'Picked Up',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -363,7 +439,8 @@ class AdminorderView extends StatelessWidget{
             // Ikon untuk menambah menu minuman
             IconButton(
               onPressed: () {
-                Get.toNamed(Routes.CREATEMINUMAN); // Rute ke halaman CreateMinuman
+                Get.toNamed(
+                    Routes.CREATEMINUMAN); // Rute ke halaman CreateMinuman
               },
               icon: Icon(
                 Icons.local_cafe, // Ikon untuk menambah menu minuman
@@ -377,12 +454,23 @@ class AdminorderView extends StatelessWidget{
                 Get.toNamed(Routes.CREATEBUBUK); // Rute ke halaman CreateBubuk
               },
               icon: Icon(
-                Icons.grain
-, // Ikon untuk menambah menu bubuk kopi
+                Icons.grain, // Ikon untuk menambah menu bubuk kopi
                 color: Colors.grey[800],
               ),
               tooltip: 'Add Bubuk Menu',
             ),
+
+            IconButton(
+              onPressed: () {
+                Get.toNamed(Routes.ADMINHELPCENTER);
+              },
+              icon: Icon(
+                Icons.support_agent,
+                color: Colors.grey[800],
+              ),
+              tooltip: 'Help Center',
+            ),
+
             // Ikon Management Order dengan dialog peringatan
             Stack(
               alignment: Alignment.center,
@@ -402,7 +490,8 @@ class AdminorderView extends StatelessWidget{
                       builder: (BuildContext context) {
                         return AlertDialog(
                           title: const Text('Warning'),
-                          content: const Text('Anda sudah berada di halaman Order Management'),
+                          content: const Text(
+                              'Anda sudah berada di halaman Order Management'),
                           actions: <Widget>[
                             TextButton(
                               onPressed: () {
@@ -577,19 +666,22 @@ class AdminorderView extends StatelessWidget{
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 10),
                   child: ClipRRect(
-  borderRadius: BorderRadius.circular(15),
-  child: Image(
-    image: (data['imageUrl'] ?? '').startsWith('http')
-        ? NetworkImage(data['imageUrl']) // Gunakan NetworkImage untuk URL
-        : AssetImage('assets/default.png') as ImageProvider, // Gunakan AssetImage jika bukan URL
-    height: 150,
-    width: 250,
-    fit: BoxFit.cover,
-    errorBuilder: (context, error, stackTrace) {
-      return Image.asset('assets/default.png'); // Fallback image jika gagal
-    },
-  ),
-),
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image(
+                      image: (data['imageUrl'] ?? '').startsWith('http')
+                          ? NetworkImage(data[
+                              'imageUrl']) // Gunakan NetworkImage untuk URL
+                          : AssetImage('assets/default.png')
+                              as ImageProvider, // Gunakan AssetImage jika bukan URL
+                      height: 150,
+                      width: 250,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                            'assets/default.png'); // Fallback image jika gagal
+                      },
+                    ),
+                  ),
                 ),
                 Text(
                   "Location: ${data['location'] ?? 'N/A'}",

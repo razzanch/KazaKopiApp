@@ -2,12 +2,22 @@ import 'package:get/get.dart';
 
 import '../modules/adminanalytics/bindings/adminanalytics_binding.dart';
 import '../modules/adminanalytics/views/adminanalytics_view.dart';
+import '../modules/adminfaq/bindings/adminfaq_binding.dart';
+import '../modules/adminfaq/views/adminfaq_view.dart';
+import '../modules/adminhelpcenter/bindings/adminhelpcenter_binding.dart';
+import '../modules/adminhelpcenter/views/adminhelpcenter_view.dart';
 import '../modules/adminhistory/bindings/adminhistory_binding.dart';
 import '../modules/adminhistory/views/adminhistory_view.dart';
 import '../modules/adminhome/bindings/adminhome_binding.dart';
 import '../modules/adminhome/views/adminhome_view.dart';
+import '../modules/adminlistvc/bindings/adminlistvc_binding.dart';
+import '../modules/adminlistvc/views/adminlistvc_view.dart';
 import '../modules/adminorder/bindings/adminorder_binding.dart';
 import '../modules/adminorder/views/adminorder_view.dart';
+import '../modules/adminreport/bindings/adminreport_binding.dart';
+import '../modules/adminreport/views/adminreport_view.dart';
+import '../modules/adminvoucher/bindings/adminvoucher_binding.dart';
+import '../modules/adminvoucher/views/adminvoucher_view.dart';
 import '../modules/article_detail/bindings/article_detail_binding.dart';
 import '../modules/article_detail/views/article_detail_view.dart';
 import '../modules/article_detail/views/article_detail_web_view.dart';
@@ -23,6 +33,8 @@ import '../modules/detail_bubuk/bindings/detail_bubuk_binding.dart';
 import '../modules/detail_bubuk/views/detail_bubuk_view.dart';
 import '../modules/detail_minuman/bindings/detail_minuman_binding.dart';
 import '../modules/detail_minuman/views/detail_minuman_view.dart';
+import '../modules/faq/bindings/faq_binding.dart';
+import '../modules/faq/views/faq_view.dart';
 import '../modules/forgotpw/bindings/forgotpw_binding.dart';
 import '../modules/forgotpw/views/forgotpw_view.dart';
 import '../modules/getconnect/bindings/getconnect_binding.dart';
@@ -45,11 +57,12 @@ import '../modules/myhistory/bindings/myhistory_binding.dart';
 import '../modules/myhistory/views/myhistory_view.dart';
 import '../modules/myorder/bindings/myorder_binding.dart';
 import '../modules/myorder/views/myorder_view.dart';
-
 import '../modules/ourlocation/bindings/ourlocation_binding.dart';
 import '../modules/ourlocation/views/ourlocation_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
+import '../modules/report/bindings/report_binding.dart';
+import '../modules/report/views/report_view.dart';
 import '../modules/resetpw/bindings/resetpw_binding.dart';
 import '../modules/resetpw/views/resetpw_view.dart';
 import '../modules/signup/bindings/signup_binding.dart';
@@ -142,7 +155,6 @@ class AppPages {
       page: () => MyorderView(),
       binding: MyorderBinding(),
     ),
-    
     GetPage(
       name: _Paths.RESETPW,
       page: () => ResetpwView(),
@@ -216,6 +228,41 @@ class AppPages {
       name: _Paths.OURLOCATION,
       page: () => OurlocationView(),
       binding: OurlocationBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMINHELPCENTER,
+      page: () => const AdminhelpcenterView(),
+      binding: AdminhelpcenterBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMINFAQ,
+      page: () => AdminfaqView(),
+      binding: AdminfaqBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMINREPORT,
+      page: () => AdminreportView(),
+      binding: AdminreportBinding(),
+    ),
+    GetPage(
+      name: _Paths.FAQ,
+      page: () => FaqView(),
+      binding: FaqBinding(),
+    ),
+    GetPage(
+      name: _Paths.REPORT,
+      page: () => ReportView(),
+      binding: ReportBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMINVOUCHER,
+      page: () => AdminvoucherView(),
+      binding: AdminvoucherBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMINLISTVC,
+      page: () => AdminlistvcView(),
+      binding: AdminlistvcBinding(),
     ),
   ];
 }

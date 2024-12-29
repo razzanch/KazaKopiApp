@@ -147,6 +147,7 @@ class _ResetpwViewState extends State<ResetpwView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         title: Text(
           'Change Password',
@@ -197,7 +198,7 @@ class _ResetpwViewState extends State<ResetpwView> {
     child: Container(
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.grey[300], // Set Container color to grey[300]
+        color: Colors.white, // Set Container color to grey[300]
         borderRadius: BorderRadius.circular(10), // Set corner radius
       ),
       child: Column(

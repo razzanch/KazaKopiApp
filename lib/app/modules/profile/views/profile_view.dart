@@ -106,6 +106,7 @@ class ProfileView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         title: Text(
           'Update Profile',
@@ -138,7 +139,7 @@ class ProfileView extends GetView<ProfileController> {
           child: Container(
             padding: EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Colors.white,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(

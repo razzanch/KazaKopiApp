@@ -178,6 +178,7 @@ class _DeleteaccViewState extends State<DeleteaccView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         title: Text(
           'Delete Account',
@@ -224,11 +225,11 @@ class _DeleteaccViewState extends State<DeleteaccView> {
       ),
       body: SingleChildScrollView(
   child: Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0), // Margin kiri, kanan, dan atas
+    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0), // Margin kiri, kanan, dan atas
     child: Container(
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.grey[300], // Warna Container menjadi grey[300]
+        color: Colors.white, // Warna Container menjadi grey[300]
         borderRadius: BorderRadius.circular(10), // Sudut melengkung
       ),
       child: Column(

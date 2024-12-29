@@ -1,11 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
 import 'package:myapp/app/modules/profile/controllers/profile_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
-import '../controllers/helpcenter_controller.dart';
+import 'package:myapp/app/modules/helpcenter/controllers/helpcenter_controller.dart';
 
 class HelpcenterView extends StatefulWidget {
   @override
@@ -13,25 +12,26 @@ class HelpcenterView extends StatefulWidget {
 }
 
 class _HelpcenterViewState extends State<HelpcenterView> {
-  String? urlImage; 
-  final String defaultImage = 'assets/LOGO.png';
   final HelpcenterController controller = Get.put(HelpcenterController());
   final TextEditingController searchController = TextEditingController();
-  RxList<Map<String, String>> filteredFaqData = <Map<String, String>>[].obs;
   final ProfileController profileController = Get.put(ProfileController());
+
+  RxList<Map<String, String>> filteredFaqData = <Map<String, String>>[].obs;
 
   @override
   void initState() {
-    super.initState(); 
-    filteredFaqData.value = controller.faqData; // Initialize with full FAQ data
+    super.initState();
 
     // Listen for changes in search input and update filtered FAQ data
     searchController.addListener(() {
       filterFaqData();
     });
-  }
 
- 
+    // Initialize filtered data
+    controller.faqData.listen((data) {
+      filteredFaqData.value = data;
+    });
+  }
 
   // Function to filter FAQ data based on search input
   void filterFaqData() {
@@ -54,21 +54,18 @@ class _HelpcenterViewState extends State<HelpcenterView> {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20)),
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
         ),
         automaticallyImplyLeading: false,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Help Center",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24),
-            ),
-          ],
+        title: Text(
+          "Help Center",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+          ),
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -89,10 +86,6 @@ class _HelpcenterViewState extends State<HelpcenterView> {
                     : (File(imagePath).existsSync()
                         ? FileImage(File(imagePath))
                         : AssetImage('assets/pp5.jpg')) as ImageProvider,
-                onBackgroundImageError: (_, __) {
-                  // Jika gambar gagal, gunakan fallback
-                  profileController.selectedImagePath.value = 'assets/pp5.jpg';
-                },
               );
             }),
           ),
@@ -121,11 +114,12 @@ class _HelpcenterViewState extends State<HelpcenterView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 8.0),
                     Text(
                       'How can we assist you today?',
-                      style:
-                          TextStyle(fontSize: 16.0, color: Colors.grey[700]),
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: Colors.grey[700],
+                      ),
                     ),
                     SizedBox(height: 16.0),
                     TextField(
@@ -142,38 +136,66 @@ class _HelpcenterViewState extends State<HelpcenterView> {
                       ),
                     ),
                     SizedBox(height: 16.0),
-                    Obx(
-                      () => Column(
-                        children: filteredFaqData.asMap().entries.map((e) {
-                          final index = e.key;
-                          final item = e.value;
+                    Obx(() {
+                      return Column(
+                        children: filteredFaqData.map((item) {
                           return Accordion(
                             title: item['title'] ?? '',
                             content: item['content'] ?? '',
-                            isOpen: controller.openedIndex.value == index &&
+                            isOpen: controller.openedIndex.value ==
+                                    filteredFaqData.indexOf(item) &&
                                 controller.isAccordionOpen.value,
-                            onTap: () => controller.toggleAccordion(index),
+                            onTap: () => controller
+                                .toggleAccordion(filteredFaqData.indexOf(item)),
                           );
                         }).toList(),
-                      ),
-                    ),
+                      );
+                    }),
                     SizedBox(height: 16.0),
                     Center(
-                      child: ElevatedButton(
+                      child: ElevatedButton.icon(
                         onPressed: () {
-                          // Handle "Send a message" action here
+                          Get.toNamed(Routes.FAQ);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[800],
+                          backgroundColor: Colors.teal,
                           foregroundColor: Colors.white,
                           minimumSize: Size(double.infinity, 48),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 12.0),
                         ),
-                        child: Text('Report Your Issue'),
+                        icon: Icon(Icons.help_outline, color: Colors.white),
+                        label: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text('FAQ', textAlign: TextAlign.left),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16.0),
+                    Center(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Get.toNamed(Routes.REPORT);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          minimumSize: Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 12.0),
+                        ),
+                        icon: Icon(Icons.report_problem, color: Colors.white),
+                        label: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text('Report Your Issue',
+                              textAlign: TextAlign.left),
+                        ),
                       ),
                     ),
                   ],
@@ -186,7 +208,6 @@ class _HelpcenterViewState extends State<HelpcenterView> {
     );
   }
 }
-
 
 class Accordion extends StatelessWidget {
   final String title;

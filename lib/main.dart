@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:myapp/dependency_injection.dart';
 import 'package:myapp/firebase_options.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,4 +25,5 @@ void main()async {
       getPages: AppPages.routes,
     ),
   );
+  DependencyInjection.init();
 }

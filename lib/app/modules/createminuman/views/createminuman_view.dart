@@ -82,12 +82,12 @@ class _CreateminumanViewState extends State<CreateminumanView> {
 @override
 Widget build(BuildContext context) {
   return Scaffold(
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.grey[300],
     appBar: AppBar(
       title: Text(
         widget.isEdit ? 'Edit Coffee Drink Menu' : 'Add Coffee Drink Menu',
         textAlign: TextAlign.left,
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
       ),
       backgroundColor: Colors.teal,
       centerTitle: false,
@@ -104,7 +104,7 @@ Widget build(BuildContext context) {
         padding: const EdgeInsets.all(12.0),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.grey[300], // Warna latar belakang abu-abu
+            color: Colors.white, // Warna latar belakang abu-abu
             borderRadius: BorderRadius.circular(15), // Radius untuk sudut
           ),
           padding: const EdgeInsets.all(16.0), // Padding di dalam Container
@@ -634,6 +634,16 @@ void _saveData() async {
           ),
           tooltip: 'Add Bubuk Menu',
         ),
+         IconButton(
+              onPressed: () {
+               Get.toNamed(Routes.ADMINHELPCENTER);
+              },
+              icon: Icon(
+                Icons.support_agent,
+                color: Colors.grey[800],
+              ),
+              tooltip: 'Help Center',
+            ),
         // Ikon Management Order tanpa latar belakang
         IconButton(
           onPressed: () {

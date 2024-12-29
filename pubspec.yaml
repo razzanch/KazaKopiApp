@@ -52,6 +52,14 @@ dependencies:
   file_picker: ^8.1.4
   speech_to_text: ^7.0.0
   permission_handler: ^11.3.1
+  geolocator: ^13.0.2
+  flutter_map: ^4.0.0
+  latlong2: ^0.8.1
+  http: ^0.13.6
+  connectivity_plus: ^6.1.1
+  lottie: ^3.0.0
+  
+  
   
   
   
@@ -122,6 +130,8 @@ flutter:
    - assets/OurIG.png
    - assets/pp5.jpg
    - assets/default.png
+   - assets/cash.png
+   - assets/tf.png
 
 
 

@@ -38,6 +38,230 @@ class _CartViewState extends State<CartView> {
     _calculateTotalAmount(); // Initial calculation of total amount
   }
 
+  TextEditingController voucherController = TextEditingController();
+
+void _showVoucherDialog() async {
+  final vouchersSnapshot = await FirebaseFirestore.instance.collection('voucher').get();
+  final vouchers = vouchersSnapshot.docs.where((doc) {
+    final data = doc.data();
+    final minPurchase = data['minPurchase'] ?? 0; // Default to 0 if minPurchase is not found
+    return minPurchase <= totalAmount; // Filter vouchers based on minPurchase
+  }).toList(); // Convert to List after filtering
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        elevation: 20,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30.0),
+          child: SingleChildScrollView( // Enable scrolling for the dialog
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Colors.teal[200]!, Colors.teal[600]!],
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Select a Voucher",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.close,
+                            color: Colors.red,
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    if (voucherController.text.isNotEmpty)
+                      Center(
+                        child: Text(
+                          "You have already selected a voucher.",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        height: 320,
+                        child: vouchers.isNotEmpty
+                            ? ListView.builder(
+                                itemCount: vouchers.length,
+                                itemBuilder: (context, index) {
+                                  final data = vouchers[index].data();
+                                  final voucherName = data['voucherName'];
+                                  final voucherValue = data['voucherValue'];
+                                  final minPurchase = data['minPurchase'];
+                                  final expiryDate = data['expiryDate'];
+                                  final imageUrl = data['imageUrl'];
+
+                                  return GestureDetector(
+                                    onTap: () {
+                                      final parsedValue =
+                                          (voucherValue * 100).toInt().toString() + '%';
+                                      voucherController.text = parsedValue;
+                                      _calculateTotalAmount();
+                                      Navigator.pop(context);
+                                    },
+                                    child: Card(
+                                      elevation: 8,
+                                      margin: EdgeInsets.symmetric(vertical: 10),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                      color: Colors.white.withOpacity(0.9),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(18),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(12),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.teal.withOpacity(0.2),
+                                                    blurRadius: 12,
+                                                    offset: Offset(0, 4),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Image.network(
+                                                imageUrl,
+                                                width: 90,
+                                                height: 90,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                            SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    voucherName,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 18,
+                                                      color: Colors.teal[800],
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 6),
+                                                  Text(
+                                                    "Value: ${(voucherValue * 100).toInt()}%",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.teal[600],
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 6),
+                                                  Text(
+                                                    "Min Purchase: Rp${minPurchase}",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.grey[700],
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 6),
+                                                  Text(
+                                                    "Expiry: ${expiryDate.split('T')[0]}",
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.grey[500],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              )
+                            : Center(
+                                child: Text(
+                                  "No vouchers available for this amount.",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                      ),
+                    SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () {
+                          voucherController.clear();
+                          _calculateTotalAmount();
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.teal[800],
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.teal.withOpacity(0.4),
+                                spreadRadius: 3,
+                                blurRadius: 8,
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            "Reset Voucher",
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+
+
 
 
   void _calculateTotalAmount() async {
@@ -58,6 +282,17 @@ class _CartViewState extends State<CartView> {
     for (var doc in bubukSnapshot.docs) {
       totalAmount += doc['total'];
     }
+      String voucherText = voucherController.text; // Get the text value from the TextField
+  
+  // Add condition: if voucherText is empty or 0, set it to 1 (no discount)
+  double voucherValue = 1; // Default to 1 (no discount)
+  if (voucherText.isNotEmpty && voucherText != '0') {
+    // Parse the voucher text to get the percentage discount
+    voucherValue = double.tryParse(voucherText.replaceAll('%', '')) ?? 1; // Default to 1 if parsing fails
+    voucherValue = voucherValue / 100; // Convert to decimal (e.g., 40% -> 0.40)
+     // Apply the voucher discount to the total amount
+  totalAmount = totalAmount - (totalAmount * voucherValue);
+  }
     setState(() {}); // Update the state to refresh UI
   }
 
@@ -221,10 +456,27 @@ class _CartViewState extends State<CartView> {
               ),
 
               SizedBox(height: 20),
-              _buildPaymentMethod(0, 'assets/visa.png', 'VISA/MasterCard'),
-              _buildPaymentMethod(1, 'assets/dana.png', 'DANA'),
-              _buildPaymentMethod(2, 'assets/linkaja.png', 'LINK AJA'),
+              _buildPaymentMethod(0, 'assets/tf.png', 'Bank Transfer'),
+              _buildPaymentMethod(1, 'assets/cash.png', 'In-Store Cash'),
               SizedBox(height: 10),
+
+               SizedBox(height: 10),
+            TextField(
+              controller: voucherController,
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: "Voucher",
+                labelStyle: TextStyle(color: Colors.grey[900]),
+                suffixIcon: Icon(Icons.local_offer, color: Colors.grey[900]),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.teal),
+                ),
+              ),
+              onTap: _showVoucherDialog,
+            ),
             ],
           ),
         ),
@@ -321,9 +573,13 @@ class _CartViewState extends State<CartView> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: Icon(Icons.cancel, color: Colors.red),
-                  onPressed: () => _showDeleteConfirmationDialog(context, doc),
-                ),
+  icon: Icon(Icons.cancel, color: Colors.red),
+  onPressed: () {
+    voucherController.clear(); // Menghapus teks di TextField voucher
+    _showDeleteConfirmationDialog(context, doc); // Memanggil dialog konfirmasi
+  },
+),
+
               ],
             ),
           ],
@@ -838,13 +1094,10 @@ class _CartViewState extends State<CartView> {
     String paymentMethod;
     switch (selectedPaymentMethod) {
       case 0:
-        paymentMethod = 'VISA/MASTERCARD';
+        paymentMethod = 'Bank Transfer';
         break;
       case 1:
-        paymentMethod = 'DANA';
-        break;
-      case 2:
-        paymentMethod = 'LINKAJA';
+        paymentMethod = 'COD';
         break;
       default:
         paymentMethod = 'Unknown';

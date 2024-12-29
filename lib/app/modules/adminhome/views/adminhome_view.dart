@@ -5,6 +5,7 @@ import 'package:myapp/app/modules/createbubuk/views/createbubuk_view.dart';
 import 'package:myapp/app/modules/createminuman/views/createminuman_view.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class AdminhomeView extends StatefulWidget {
   @override
@@ -17,9 +18,51 @@ class _AdminhomeViewState extends State<AdminhomeView> {
   String selectedLocation = 'Pasar Tambak Rejo, Surabaya'; // Variabel untuk lokasi yang dipilih
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
+  final TextEditingController searchController = TextEditingController();
+  String searchQuery = '';
+  late stt.SpeechToText _speech; // Instance SpeechToText
+  bool _isListening = false;
+
+  int currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
+  // Fungsi untuk memulai speech-to-text
+  void _startListening() async {
+    bool available = await _speech.initialize(
+      onStatus: (status) => print('Speech Status: $status'),
+      onError: (error) => print('Speech Error: $error'),
+    );
+
+    if (available) {
+      setState(() => _isListening = true);
+      _speech.listen(
+        onResult: (result) {
+          setState(() {
+            searchQuery = result.recognizedWords.toLowerCase();
+            searchController.text = searchQuery; // Masukkan hasil ke TextField
+          });
+        },
+      );
+    } else {
+      print("Speech recognition not available");
+    }
+  }
+
+  // Fungsi untuk menghentikan speech-to-text
+  void _stopListening() {
+    setState(() => _isListening = false);
+    _speech.stop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         backgroundColor: Colors.teal,
         elevation: 0,
@@ -69,118 +112,245 @@ class _AdminhomeViewState extends State<AdminhomeView> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+           Padding(
+  padding: const EdgeInsets.all(8.0),
+  child: TextField(
+    controller: searchController,
+    onChanged: (value) {
+      setState(() {
+        searchQuery = value.toLowerCase();
+      });
+    },
+    decoration: InputDecoration(
+      hintText: 'Search',
+      prefixIcon: Icon(Icons.search),
+      suffixIcon: IconButton(
+        icon: Icon(
+          _isListening ? Icons.mic : Icons.mic_none,
+          color: _isListening ? Colors.red : Colors.grey,
+        ),
+        onPressed: () {
+          if (_isListening) {
+            _stopListening();
+          } else {
+            _startListening();
+          }
+        },
+      ),
+      filled: true,
+      fillColor: Colors.white, // Latar belakang putih
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.grey), // Border default grey
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.teal, width: 2), // Border teal saat fokus
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.grey), // Border grey saat tidak fokus
+      ),
+    ),
+  ),
+),
+            // Carousel section
+           Container(
+  margin: const EdgeInsets.all(8.0),
+  padding: const EdgeInsets.all(8.0),
+  decoration: BoxDecoration(
+    color: Colors.white, // Latar belakang putih
+    borderRadius: BorderRadius.circular(10), // Radius sudut
+    boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.3), // Bayangan
+        spreadRadius: 2,
+        blurRadius: 5,
+        offset: Offset(0, 3),
+      ),
+    ],
+  ),
+  child:Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    // Header dengan Text dan Icon
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0), // Menggeser teks ke kanan
+          child: GestureDetector(
+  onTap: () {
+    // Navigasi ke halaman ADMINVOUCHER
+    Get.toNamed(Routes.ADMINVOUCHER);
+  },
+  child: Text(
+    'Voucher Management',
+    style: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.bold,
+      color: Colors.teal,
+    ),
+  ),
+)
+
+        ),
+        IconButton(
+          icon: Icon(Icons.arrow_forward_ios, color: Colors.teal),
+          iconSize: 16, // Mengecilkan ukuran ikon
+          onPressed: () {
+            Get.toNamed(Routes.ADMINVOUCHER);
+          },
+        ),
+      ],
+    ),
+    // Container untuk PageView dan indikator
+    StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('voucher').snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final documents = snapshot.data!.docs;
+        final images = documents
+            .map((doc) => doc['imageUrl'])
+            .where((url) => url != null)
+            .toList();
+
+        if (images.isEmpty) {
+          return Center(child: Text('No vouchers available'));
+        }
+
+        return Container(
+          margin: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.teal, width: 2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            children: [
+              Container(
+                height: 150,
+                child: PageView.builder(
+                  controller: pageController,
+                  onPageChanged: (index) {
+                    setState(() {
+                      currentPage = index;
+                    });
+                  },
+                  itemCount: images.length,
+                  itemBuilder: (context, index) {
+                    return Image.network(
+                      images[index],
+                      fit: BoxFit.cover,
+                    );
+                  },
                 ),
               ),
-            ),
-            // Carousel section
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(images.length, (index) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: currentPage == index ? Colors.teal : Colors.white,
+                      border: Border.all(color: Colors.grey),
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
+        );
+      },
+    ),
+  ],
+),
+),
+
+
             Container(
-              margin: const EdgeInsets.all(8.0),
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
+  margin: const EdgeInsets.all(8.0), // Margin untuk memberikan jarak dari elemen lain
+  padding: const EdgeInsets.all(8.0), // Padding untuk konten di dalamnya
+  decoration: BoxDecoration(
+    color: Colors.white, // Latar belakang putih
+    borderRadius: BorderRadius.circular(12), // Radius sudut
+    boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.3), // Efek bayangan
+        spreadRadius: 2,
+        blurRadius: 5,
+        offset: Offset(0, 3), // Arah bayangan
+      ),
+    ],
+  ),
+  child: Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    GestureDetector(
+      onTap: () {
+        setState(() {
+          isMinumanSelected = true; // Set Minuman aktif
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8), // Padding agar teks tidak terlalu mentok
+        decoration: isMinumanSelected
+            ? BoxDecoration(
+                color: Colors.teal.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12.0),
                 border: Border.all(color: Colors.teal, width: 2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    height: 150,
-                    child: PageView(
-                      controller: pageController,
-                      children: [
-                        Image.asset('assets/news1.png'),
-                        Image.asset('assets/news2.png'),
-                        Image.asset('assets/news3.png'),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(3, (index) {
-                      return Container(
-                        margin: EdgeInsets.symmetric(horizontal: 4),
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey,
-                          border: Border.all(color: Colors.grey),
-                        ),
-                      );
-                    }),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isMinumanSelected = true; // Set Minuman aktif
-                      });
-                    },
-                    child: Column(
-                      children: [
-                        Text(
-                          "Minuman",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: isMinumanSelected ? Colors.black : Colors.grey,
-                          ),
-                        ),
-                        if (isMinumanSelected)
-                          Container(
-                            margin: EdgeInsets.only(top: 4),
-                            height: 2,
-                            width: 60,
-                            color: Colors.teal,
-                          ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isMinumanSelected = false; // Set Bubuk Kopi aktif
-                      });
-                    },
-                    child: Column(
-                      children: [
-                        Text(
-                          "Bubuk Kopi",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: !isMinumanSelected ? Colors.black : Colors.grey,
-                          ),
-                        ),
-                        if (!isMinumanSelected)
-                          Container(
-                            margin: EdgeInsets.only(top: 4),
-                            height: 2,
-                            width: 60,
-                            color: Colors.teal,
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+              )
+            : null,
+        child: Text(
+          "Minuman",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: isMinumanSelected ? Colors.teal : Colors.grey,
+          ),
+        ),
+      ),
+    ),
+    SizedBox(width: 50), // Memberikan gap yang bisa diatur
+    GestureDetector(
+      onTap: () {
+        setState(() {
+          isMinumanSelected = false; // Set Bubuk Kopi aktif
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        decoration: !isMinumanSelected
+            ? BoxDecoration(
+                color: Colors.teal.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(color: Colors.teal, width: 2),
+              )
+            : null,
+        child: Text(
+          "Bubuk Kopi",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: !isMinumanSelected ? Colors.teal : Colors.grey,
+          ),
+        ),
+      ),
+    ),
+  ],
+),
+
+  ),
+),
             // Kartu Minuman atau Bubuk Kopi
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -239,6 +409,16 @@ class _AdminhomeViewState extends State<AdminhomeView> {
               ),
               tooltip: 'Add Bubuk Kopi',
             ),
+             IconButton(
+              onPressed: () {
+               Get.toNamed(Routes.ADMINHELPCENTER);
+              },
+              icon: Icon(
+                Icons.support_agent,
+                color: Colors.grey[800],
+              ),
+              tooltip: 'Help Center',
+            ),
             IconButton(
               onPressed: () {
                 Get.toNamed(Routes.ADMINORDER);
@@ -258,9 +438,7 @@ class _AdminhomeViewState extends State<AdminhomeView> {
 // Method untuk membangun kartu dari koleksi 'minuman'
 Widget buildMinumanCards() {
   return StreamBuilder<QuerySnapshot>(
-    stream: firestore.collection('minuman')
-      .where('location', isEqualTo: selectedLocation) // Filter berdasarkan lokasi
-      .snapshots(),
+     stream: firestore.collection('minuman').snapshots(),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return Center(child: CircularProgressIndicator());
@@ -268,11 +446,23 @@ Widget buildMinumanCards() {
       if (snapshot.hasError) {
         return Center(child: Text('Error: ${snapshot.error}'));
       }
-
       final documents = snapshot.data!.docs;
 
-      if (documents.isEmpty) {
-        return Center(child: Text('Tidak ada data untuk lokasi ini.'));
+      final filteredDocuments = documents.where((doc) {
+  final data = doc.data() as Map<String, dynamic>;
+  final name = data['name'].toString().toLowerCase();
+  return data['status'] == true &&
+      data['location'] == selectedLocation &&
+      (searchQuery.isEmpty || name.contains(searchQuery));
+}).toList();
+
+      if (filteredDocuments.isEmpty) {
+        return Center(
+          child: Text(
+            'Tidak ada minuman tersedia di lokasi ini.',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        );
       }
 
       return GridView.builder(
@@ -284,14 +474,14 @@ Widget buildMinumanCards() {
         ),
         shrinkWrap: true,
         physics: NeverScrollableScrollPhysics(),
-        itemCount: documents.length,
+        itemCount: filteredDocuments.length,
         itemBuilder: (context, index) {
-          final data = documents[index].data() as Map<String, dynamic>;
+          final data = filteredDocuments[index].data() as Map<String, dynamic>;
           return Container(
             height: 250,
             padding: EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: Colors.grey[350],
+              color: Colors.white,
               borderRadius: BorderRadius.circular(15),
             ),
             child: Column(
@@ -516,9 +706,7 @@ Widget buildMinumanCards() {
 // Method untuk membangun kartu dari koleksi 'bubukkopi'
 Widget buildBubukKopiCards() {
   return StreamBuilder<QuerySnapshot>(
-    stream: firestore.collection('bubukkopi')
-      .where('location', isEqualTo: selectedLocation) // Filter berdasarkan lokasi
-      .snapshots(),
+    stream: firestore.collection('bubukkopi').snapshots(),
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return Center(child: CircularProgressIndicator());
@@ -526,11 +714,23 @@ Widget buildBubukKopiCards() {
       if (snapshot.hasError) {
         return Center(child: Text('Error: ${snapshot.error}'));
       }
-
       final documents = snapshot.data!.docs;
 
-      if (documents.isEmpty) {
-        return Center(child: Text('Tidak ada data untuk lokasi ini.'));
+final filteredDocuments = documents.where((doc) {
+  final data = doc.data() as Map<String, dynamic>;
+  final name = data['name'].toString().toLowerCase();
+  return data['status'] == true &&
+      data['location'] == selectedLocation &&
+      (searchQuery.isEmpty || name.contains(searchQuery));
+}).toList();
+
+      if (filteredDocuments.isEmpty) {
+        return Center(
+          child: Text(
+            'Tidak ada bubuk kopi tersedia di lokasi ini.',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        );
       }
 
       return GridView.builder(
@@ -542,14 +742,14 @@ Widget buildBubukKopiCards() {
         ),
         shrinkWrap: true,
         physics: NeverScrollableScrollPhysics(),
-        itemCount: documents.length,
+        itemCount: filteredDocuments.length,
         itemBuilder: (context, index) {
-          final data = documents[index].data() as Map<String, dynamic>;
+          final data = filteredDocuments[index].data() as Map<String, dynamic>;
           return Container(
             height: 250,
             padding: EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: Colors.grey[350],
+              color: Colors.white,
               borderRadius: BorderRadius.circular(15),
             ),
             child: Column(
