@@ -263,6 +263,6 @@ class AppPages {
       name: _Paths.ADMINLISTVC,
       page: () => AdminlistvcView(),
       binding: AdminlistvcBinding(),
-    ),
+    ),    
   ];
 }

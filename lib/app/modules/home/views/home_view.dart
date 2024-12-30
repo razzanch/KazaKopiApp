@@ -258,75 +258,75 @@ class _HomeViewState extends State<HomeView> {
                   ),
                   // Container untuk PageView dan indikator
                   StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('voucher')
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return Center(child: CircularProgressIndicator());
-                      }
+  stream: FirebaseFirestore.instance.collection('voucher').snapshots(),
+  builder: (context, snapshot) {
+    if (!snapshot.hasData) {
+      return Center(child: CircularProgressIndicator());
+    }
 
-                      final documents = snapshot.data!.docs;
-                      final images = documents
-                          .map((doc) => doc['imageUrl'])
-                          .where((url) => url != null)
-                          .toList();
+    final documents = snapshot.data!.docs.where((doc) {
+      final expiryDate = DateTime.tryParse(doc['expiryDate'] ?? '');
+      return expiryDate != null && expiryDate.isAfter(DateTime.now());
+    }).toList(); // Filter hanya yang expiryDate >= sekarang
 
-                      if (images.isEmpty) {
-                        return Center(child: Text('No vouchers available'));
-                      }
+    final images = documents
+        .map((doc) => doc['imageUrl'])
+        .where((url) => url != null)
+        .toList();
 
-                      return Container(
-                        margin: const EdgeInsets.all(8.0),
-                        padding: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.teal, width: 2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: [
-                            Container(
-                              height: 150,
-                              child: PageView.builder(
-                                controller: pageController,
-                                onPageChanged: (index) {
-                                  setState(() {
-                                    currentPage = index;
-                                  });
-                                },
-                                itemCount: images.length,
-                                itemBuilder: (context, index) {
-                                  return Image.network(
-                                    images[index],
-                                    fit: BoxFit.cover,
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(images.length, (index) {
-                                return Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 4),
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: currentPage == index
-                                        ? Colors.teal
-                                        : Colors.white,
-                                    border: Border.all(color: Colors.grey),
-                                  ),
-                                );
-                              }),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+    if (images.isEmpty) {
+      return Center(child: Text('No valid vouchers available'));
+    }
+
+    return Container(
+      margin: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.teal, width: 2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          Container(
+            height: 150,
+            child: PageView.builder(
+              controller: pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  currentPage = index;
+                });
+              },
+              itemCount: images.length,
+              itemBuilder: (context, index) {
+                return Image.network(
+                  images[index],
+                  fit: BoxFit.cover,
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(images.length, (index) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: currentPage == index ? Colors.teal : Colors.white,
+                  border: Border.all(color: Colors.grey),
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  },
+),
+
                 ],
               ),
             ),
@@ -842,14 +842,20 @@ class _HomeViewState extends State<HomeView> {
   }
 
   void _showVoucherDialog() async {
-  final vouchers =
-      await FirebaseFirestore.instance.collection('voucher').get();
+  final vouchersSnapshot = await FirebaseFirestore.instance.collection('voucher').get();
+  final now = DateTime.now(); // Tanggal dan waktu saat ini
+  final validVouchers = vouchersSnapshot.docs.where((doc) {
+    final data = doc.data();
+    final expiryDate = DateTime.tryParse(data['expiryDate'] ?? '');
+    return expiryDate != null && expiryDate.isAfter(now);
+  }).toList(); // Filter hanya voucher yang masih valid
+
   showDialog(
     context: context,
     builder: (context) {
       return Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.0), // More rounded corners
+          borderRadius: BorderRadius.circular(30.0),
         ),
         elevation: 20,
         child: ClipRRect(
@@ -862,18 +868,16 @@ class _HomeViewState extends State<HomeView> {
                 colors: [Colors.teal[200]!, Colors.teal[600]!],
               ),
             ),
-            child: SingleChildScrollView( // Enable scrolling
+            child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title of the dialog
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Teks "Select a Voucher" di sebelah kiri
                         Text(
                           "Select a Voucher",
                           style: TextStyle(
@@ -882,116 +886,119 @@ class _HomeViewState extends State<HomeView> {
                             color: Colors.white,
                           ),
                         ),
-                        // Tombol Icon "X" di sebelah kanan untuk menutup dialog
                         IconButton(
                           icon: Icon(
                             Icons.close,
-                            color: Colors.red, // Warna merah untuk ikon
+                            color: Colors.red,
                           ),
                           onPressed: () {
-                            Navigator.pop(context); // Menutup dialog
+                            Navigator.pop(context);
                           },
                         ),
                       ],
                     ),
                     SizedBox(height: 16),
-                    // Voucher list with a scrollable view and background blur effect
                     Container(
                       height: 320,
-                      child: ListView.builder(
-                        itemCount: vouchers.docs.length,
-                        itemBuilder: (context, index) {
-                          final data = vouchers.docs[index].data();
-                          final voucherName = data['voucherName'];
-                          final voucherValue = data['voucherValue'];
-                          final minPurchase = data['minPurchase'];
-                          final expiryDate = data['expiryDate'];
-                          final imageUrl = data['imageUrl'];
+                      child: validVouchers.isNotEmpty
+                          ? ListView.builder(
+                              itemCount: validVouchers.length,
+                              itemBuilder: (context, index) {
+                                final data = validVouchers[index].data();
+                                final voucherName = data['voucherName'];
+                                final voucherValue = data['voucherValue'];
+                                final minPurchase = data['minPurchase'];
+                                final expiryDate = data['expiryDate'];
+                                final imageUrl = data['imageUrl'];
 
-                          return GestureDetector(
-                            child: Card(
-                              elevation: 8,
-                              margin: EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              color: Colors.white.withOpacity(
-                                  0.9), // Slightly transparent white
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(18),
-                                child: Row(
-                                  children: [
-                                    // Voucher Image with a modern rounded border
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.teal.withOpacity(0.2),
-                                            blurRadius: 12,
-                                            offset: Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Image.network(
-                                        imageUrl,
-                                        width: 90,
-                                        height: 90,
-                                        fit: BoxFit.cover,
-                                      ),
+                                return GestureDetector(
+                                  child: Card(
+                                    elevation: 8,
+                                    margin: EdgeInsets.symmetric(vertical: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18),
                                     ),
-                                    SizedBox(width: 12),
-                                    // Voucher Details with padding and custom font style
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                    color: Colors.white.withOpacity(0.9),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(18),
+                                      child: Row(
                                         children: [
-                                          Text(
-                                            voucherName,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18,
-                                              color: Colors.teal[800],
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(12),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.teal.withOpacity(0.2),
+                                                  blurRadius: 12,
+                                                  offset: Offset(0, 4),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Image.network(
+                                              imageUrl,
+                                              width: 90,
+                                              height: 90,
+                                              fit: BoxFit.cover,
                                             ),
                                           ),
-                                          SizedBox(height: 6),
-                                          Text(
-                                            "Value: ${(voucherValue * 100).toInt()}%",
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.teal[600],
-                                            ),
-                                          ),
-                                          SizedBox(height: 6),
-                                          Text(
-                                            "Min Purchase: Rp${minPurchase}",
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey[700],
-                                            ),
-                                          ),
-                                          SizedBox(height: 6),
-                                          Text(
-                                            "Expiry: ${expiryDate.split('T')[0]}",
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey[500],
+                                          SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  voucherName,
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                    color: Colors.teal[800],
+                                                  ),
+                                                ),
+                                                SizedBox(height: 6),
+                                                Text(
+                                                  "Value: ${(voucherValue * 100).toInt()}%",
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.teal[600],
+                                                  ),
+                                                ),
+                                                SizedBox(height: 6),
+                                                Text(
+                                                  "Min Purchase: Rp${minPurchase}",
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.grey[700],
+                                                  ),
+                                                ),
+                                                SizedBox(height: 6),
+                                                Text(
+                                                  "Expiry: ${expiryDate.split('T')[0]}",
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey[500],
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                  ],
+                                  ),
+                                );
+                              },
+                            )
+                          : Center(
+                              child: Text(
+                                "No valid vouchers available.",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
                                 ),
                               ),
                             ),
-                          );
-                        },
-                      ),
                     ),
                     SizedBox(height: 16),
-                    // Cancel Button with a floating effect
                   ],
                 ),
               ),

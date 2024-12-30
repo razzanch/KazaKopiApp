@@ -40,6 +40,7 @@ abstract class Routes {
   static const ADMINVOUCHER = _Paths.ADMINVOUCHER;
   static const ADMINLISTVC = _Paths.ADMINLISTVC;
   static const CONNECTION = _Paths.CONNECTION;
+  static const NOTIFICATION = _Paths.NOTIFICATION;
 }
 
 abstract class _Paths {
@@ -80,4 +81,5 @@ abstract class _Paths {
   static const ADMINVOUCHER = '/adminvoucher';
   static const ADMINLISTVC = '/adminlistvc';
   static const CONNECTION = '/connection';
+  static const NOTIFICATION = '/notification';
 }

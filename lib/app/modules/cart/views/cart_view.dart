@@ -45,7 +45,13 @@ void _showVoucherDialog() async {
   final vouchers = vouchersSnapshot.docs.where((doc) {
     final data = doc.data();
     final minPurchase = data['minPurchase'] ?? 0; // Default to 0 if minPurchase is not found
-    return minPurchase <= totalAmount; // Filter vouchers based on minPurchase
+    final expiryDateString = data['expiryDate']; // Expiry date from the voucher data
+    final expiryDate = DateTime.tryParse(expiryDateString ?? '');
+
+    // Filter vouchers based on minPurchase and expiryDate
+    return minPurchase <= totalAmount &&
+        expiryDate != null &&
+        expiryDate.isAfter(DateTime.now());
   }).toList(); // Convert to List after filtering
 
   showDialog(
