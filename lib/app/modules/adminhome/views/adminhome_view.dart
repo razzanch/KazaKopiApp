@@ -528,10 +528,12 @@ Widget buildMinumanCards() {
                     IconButton(
   icon: Icon(Icons.delete, color: Colors.red),
   onPressed: () {
-    // Confirmation dialog before deletion
+    // Store the BuildContext for later use
+    final scaffoldContext = context;
+    
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text('Konfirmasi Hapus'),
           content: Text('Apakah Anda yakin ingin menghapus item ini?'),
@@ -539,44 +541,49 @@ Widget buildMinumanCards() {
             TextButton(
               child: Text('Batal'),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
             ),
             TextButton(
               child: Text('OK'),
               onPressed: () async {
-                Navigator.of(context).pop(); // Close the dialog
+                // Close the dialog first
+                Navigator.of(dialogContext).pop();
                 
                 try {
-  final supabaseClient = Supabase.instance.client;
-  final bucketName = 'minuman_pictures';
-  
-  // Ambil semua file dari bucket
-  final response = await supabaseClient.storage.from(bucketName).list();
+                  final supabaseClient = Supabase.instance.client;
+                  final bucketName = 'minuman_pictures';
+                  
+                  // Ambil semua file dari bucket
+                  final response = await supabaseClient.storage.from(bucketName).list();
 
-  // Filter file yang sesuai dengan pola
-  final fileName = response
-      .map((item) => item.name)
-      .firstWhere(
-        (name) => name.startsWith('${data['name']}-') && name.endsWith('.jpg'),
-        orElse: () => throw Exception('File tidak ditemukan'),
-      );
+                  // Filter file yang sesuai dengan pola
+                  final fileName = response
+                      .map((item) => item.name)
+                      .firstWhere(
+                        (name) => name.startsWith('${data['name']}-') && name.endsWith('.jpg'),
+                        orElse: () => throw Exception('File tidak ditemukan'),
+                      );
 
-  // Hapus file
-  await supabaseClient.storage.from(bucketName).remove([fileName]);
+                  // Hapus file
+                  await supabaseClient.storage.from(bucketName).remove([fileName]);
 
-  // Hapus dokumen dari Firestore
-  await firestore.collection('minuman').doc(documents[index].id).delete();
+                  // Hapus dokumen dari Firestore
+                  await firestore.collection('minuman').doc(filteredDocuments[index].id).delete();
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Berhasil menghapus item dan file gambar')),
-  );
-} catch (error) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Gagal menghapus item: $error')),
-  );
-}
-
+                  // Use the stored context to show SnackBar
+                  if (scaffoldContext.mounted) {
+                    ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                      SnackBar(content: Text('Berhasil menghapus item dan file gambar')),
+                    );
+                  }
+                } catch (error) {
+                  if (scaffoldContext.mounted) {
+                    ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                      SnackBar(content: Text('Gagal menghapus item: $error')),
+                    );
+                  }
+                }
               },
             ),
           ],
@@ -793,65 +800,73 @@ final filteredDocuments = documents.where((doc) {
                       iconSize: 30,
                     ),
                     IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        // Confirmation dialog before deletion
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text('Konfirmasi Hapus'),
-                              content: Text('Apakah Anda yakin ingin menghapus item ini?'),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: Text('Batal'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                                TextButton(
-                                  child: Text('OK'),
-                                  onPressed: () async {
-                                    Navigator.of(context).pop(); // Close the dialog
+  icon: Icon(Icons.delete, color: Colors.red),
+  onPressed: () {
+    // Store the BuildContext for later use
+    final scaffoldContext = context;
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('Konfirmasi Hapus'),
+          content: Text('Apakah Anda yakin ingin menghapus item ini?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Batal'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            TextButton(
+              child: Text('OK'),
+              onPressed: () async {
+                // Close the dialog first
+                Navigator.of(dialogContext).pop();
                 
                 try {
-  final supabaseClient = Supabase.instance.client;
-  final bucketName = 'bubuk_pictures';
-  
-  // Ambil semua file dari bucket
-  final response = await supabaseClient.storage.from(bucketName).list();
+                  final supabaseClient = Supabase.instance.client;
+                  final bucketName = 'bubuk_pictures';
+                  
+                  // Ambil semua file dari bucket
+                  final response = await supabaseClient.storage.from(bucketName).list();
 
-  // Filter file yang sesuai dengan pola
-  final fileName = response
-      .map((item) => item.name)
-      .firstWhere(
-        (name) => name.startsWith('${data['name']}-') && name.endsWith('.jpg'),
-        orElse: () => throw Exception('File tidak ditemukan'),
-      );
+                  // Filter file yang sesuai dengan pola
+                  final fileName = response
+                      .map((item) => item.name)
+                      .firstWhere(
+                        (name) => name.startsWith('${data['name']}-') && name.endsWith('.jpg'),
+                        orElse: () => throw Exception('File tidak ditemukan'),
+                      );
 
-  // Hapus file
-  await supabaseClient.storage.from(bucketName).remove([fileName]);
+                  // Hapus file
+                  await supabaseClient.storage.from(bucketName).remove([fileName]);
 
-  // Hapus dokumen dari Firestore
-  await firestore.collection('bubukkopi').doc(documents[index].id).delete();
+                  // Hapus dokumen dari Firestore
+                  await firestore.collection('bubukkopi').doc(filteredDocuments[index].id).delete();
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Berhasil menghapus item dan file gambar')),
-  );
-} catch (error) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Gagal menghapus item: $error')),
-  );
-} // Close the dialog
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      iconSize: 30,
-                    ),
+                  // Use the stored context to show SnackBar
+                  if (scaffoldContext.mounted) {
+                    ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                      SnackBar(content: Text('Berhasil menghapus item dan file gambar')),
+                    );
+                  }
+                } catch (error) {
+                  if (scaffoldContext.mounted) {
+                    ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                      SnackBar(content: Text('Gagal menghapus item: $error')),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  },
+  iconSize: 30,
+),
                     IconButton(
                       icon: Icon(Icons.info, color: Colors.blue),
                       onPressed: () {
