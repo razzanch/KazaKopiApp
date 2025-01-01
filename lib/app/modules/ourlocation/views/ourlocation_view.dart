@@ -14,11 +14,11 @@ class OurlocationView extends StatefulWidget {
 }
 
 class _OurlocationViewState extends State<OurlocationView> {
-  final RxString selectedLocation = 'Google 2000'.obs;
+  final RxString selectedLocation = 'KAZA MALL'.obs;
 
   final List<Map<String, String>> locations = [
-    {'name': 'Pasar Tambak Rejo, Surabaya', 'url': 'Google 2000'},
-    {'name': 'CitraLand CBD Boulevard, Surabaya', 'url': 'Google 1842'},
+    {'name': 'Pasar Tambak Rejo, Surabaya', 'url': 'KAZA MALL'},
+    {'name': 'CitraLand CBD Boulevard, Surabaya', 'url': 'UNIVERSITAS CIPUTRA'},
   ];
 
   final OurlocationController controllerConvert =

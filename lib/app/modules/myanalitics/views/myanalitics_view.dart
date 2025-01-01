@@ -136,7 +136,7 @@ class _MyanaliticsViewState extends State<MyanaliticsView> {
                           color: Colors.blue,
                         ),
                         _buildStatsCard(
-                          title: 'Total Pemasukan',
+                          title: 'Total Pengeluaran',
                           value: 'Rp $totalIncome',
                           icon: Icons.attach_money,
                           color: Colors.green,

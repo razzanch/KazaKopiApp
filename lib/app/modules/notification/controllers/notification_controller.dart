@@ -1,14 +1,17 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Add this import
+import 'package:firebase_auth/firebase_auth.dart';
 
 class NotificationController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance; // Add Firebase Auth
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  StreamSubscription<QuerySnapshot>? _orderSubscription;
 
   // Get current user UID
   String? get currentUserUid => _auth.currentUser?.uid;
@@ -16,12 +19,22 @@ class NotificationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    print("NotificationController initialized.");
     _initializeNotifications();
     _setupFirebaseMessaging();
     _listenToOrderCollection();
   }
 
+  @override
+  void onClose() {
+    super.onClose();
+    print("NotificationController closed.");
+    // Cancel the Firestore subscription if it exists
+    _orderSubscription?.cancel();
+  }
+
   Future<void> _initializeNotifications() async {
+    print("Initializing local notifications...");
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -33,6 +46,7 @@ class NotificationController extends GetxController {
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
+        print("Notification tapped: ${response.payload}");
         _handleNotificationTap(response);
       },
     );
@@ -41,59 +55,75 @@ class NotificationController extends GetxController {
   }
 
   Future<void> _requestPermissions() async {
+    print("Requesting notification permissions...");
     final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
         flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
-            
+
     if (androidImplementation != null) {
-      await androidImplementation.requestNotificationsPermission();
+      final granted = await androidImplementation.requestNotificationsPermission();
+      print("Android notification permissions granted: $granted");
     }
-    
-    await _messaging.requestPermission(
+
+    final settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
+    print("Firebase Messaging permissions granted: ${settings.authorizationStatus}");
   }
 
   Future<void> _setupFirebaseMessaging() async {
+    print("Setting up Firebase Messaging...");
+
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      // Check if the message is intended for the current user
+      print("Foreground FCM message received: ${message.data}");
       if (message.data['uid'] == currentUserUid) {
         _handleForegroundMessage(message);
       }
     });
 
-    FirebaseMessaging.instance.getInitialMessage().then((message) {
-      if (message != null && message.data['uid'] == currentUserUid) {
-        _handleTerminatedMessage(message);
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print("FCM message opened app: ${message.data}");
+      if (message.data['uid'] == currentUserUid) {
+        _handleBackgroundMessage(message);
       }
     });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      if (message.data['uid'] == currentUserUid) {
-        _handleBackgroundMessage(message);
+    FirebaseMessaging.instance.getInitialMessage().then((message) {
+      if (message != null) {
+        print("FCM message on app start: ${message.data}");
+        if (message.data['uid'] == currentUserUid) {
+          _handleTerminatedMessage(message);
+        }
       }
     });
   }
 
   void _listenToOrderCollection() {
-    // Only proceed if there's a logged-in user
-    if (currentUserUid == null) return;
+    if (currentUserUid == null) {
+      print("No logged-in user, Firestore listener not set.");
+      return;
+    }
 
-    _firestore.collection('order')
-        .where('uid', isEqualTo: currentUserUid) // Filter by current user's UID
+    print("Listening to Firestore orders for UID: $currentUserUid");
+    _orderSubscription = _firestore
+        .collection('order')
+        .where('uid', isEqualTo: currentUserUid)
         .snapshots()
         .listen((querySnapshot) {
+      print("Order changes detected: ${querySnapshot.docChanges.length}");
       for (var change in querySnapshot.docChanges) {
         if (change.type == DocumentChangeType.modified) {
           final data = change.doc.data();
+          print("Firestore document modified: $data");
+
           if (data != null && data['status'] != null) {
             _showNotification(
               title: 'Order Update',
-              body: 'Status Pesanan Terbaru! : ${data['status']}',
+              body: 'Status Pesanan Terbaru: ${data['status']}',
               payload: {
                 'orderId': change.doc.id,
                 'status': data['status'],
@@ -111,9 +141,12 @@ class NotificationController extends GetxController {
     required String body,
     required Map<String, dynamic> payload,
   }) async {
-    // Double-check that the notification is for the current user
-    if (payload['uid'] != currentUserUid) return;
+    if (payload['uid'] != currentUserUid) {
+      print("Notification ignored: Not for current user.");
+      return;
+    }
 
+    print("Preparing to show notification: $title - $body");
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       'order_channel',
@@ -137,19 +170,22 @@ class NotificationController extends GetxController {
         platformChannelSpecifics,
         payload: payload.toString(),
       );
+      print("Notification shown successfully.");
     } catch (e) {
       print("Error sending notification: $e");
     }
   }
 
   void _handleNotificationTap(NotificationResponse response) {
+    print("Notification tapped, payload: ${response.payload}");
     if (response.payload != null) {
       // Navigate to appropriate screen based on payload
-      // Get.to(() => OrderDetailScreen(orderId: response.payload));
+      // Example: Get.to(() => OrderDetailScreen(orderId: response.payload));
     }
   }
 
   void _handleForegroundMessage(RemoteMessage message) {
+    print("Handling foreground FCM message...");
     _showNotification(
       title: message.notification?.title ?? 'New Notification',
       body: message.notification?.body ?? '',
@@ -158,23 +194,21 @@ class NotificationController extends GetxController {
   }
 
   void _handleBackgroundMessage(RemoteMessage message) {
-    if (message.data.isNotEmpty) {
-      _showNotification(
-        title: message.notification?.title ?? 'New Notification',
-        body: message.notification?.body ?? '',
-        payload: message.data,
-      );
-    }
+    print("Handling background FCM message...");
+    _showNotification(
+      title: message.notification?.title ?? 'New Notification',
+      body: message.notification?.body ?? '',
+      payload: message.data,
+    );
   }
 
   void _handleTerminatedMessage(RemoteMessage message) {
-    if (message.data.isNotEmpty) {
-      _showNotification(
-        title: message.notification?.title ?? 'New Notification',
-        body: message.notification?.body ?? '',
-        payload: message.data,
-      );
-    }
+    print("Handling terminated state FCM message...");
+    _showNotification(
+      title: message.notification?.title ?? 'New Notification',
+      body: message.notification?.body ?? '',
+      payload: message.data,
+    );
   }
 }
 

@@ -519,7 +519,7 @@ Widget buildMinumanCards() {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                             builder: (context) => CreateminumanView(isEdit: true, documentId: documents[index].id),
+                             builder: (context) => CreateminumanView(isEdit: true, documentId: filteredDocuments[index].id),
                           ),
                         );
                       },
@@ -786,7 +786,7 @@ final filteredDocuments = documents.where((doc) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => CreatebubukView(isEdit: true, documentId: documents[index].id),
+                            builder: (context) => CreatebubukView(isEdit: true, documentId: filteredDocuments[index].id),
                           ),
                         );
                       },

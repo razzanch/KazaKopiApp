@@ -4,19 +4,19 @@ import 'package:get/get.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class NotificationadminController extends GetxController {
+class UnifiedNotificationController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
-  // UID Admin yang harus menerima notifikasi
-  final String specialUid = 'Idx7Tiy4kwOXob9ZgltbnWhWnu43';
+  // UID khusus untuk admin
+  final String adminUid = 'Idx7Tiy4kwOXob9ZgltbnWhWnu43';
 
   @override
   void onInit() {
     super.onInit();
-    print("Initializing NotificationadminController...");
+    print("UnifiedNotificationController initialized.");
     _initializeNotifications();
     _setupFirebaseMessaging();
     _listenToOrderCollection();
@@ -24,12 +24,12 @@ class NotificationadminController extends GetxController {
 
   @override
   void onClose() {
-    print("Closing NotificationadminController...");
+    print("UnifiedNotificationController closed.");
     super.onClose();
   }
 
   Future<void> _initializeNotifications() async {
-    print("Initializing local notifications...");
+    print("Initializing notifications...");
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -45,32 +45,18 @@ class NotificationadminController extends GetxController {
       },
     );
 
-    print("Local notifications initialized.");
+    print("Notifications initialized.");
     await _requestPermissions();
   }
 
   Future<void> _requestPermissions() async {
     print("Requesting notification permissions...");
-    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
-
-    if (androidImplementation != null) {
-      final bool? granted =
-          await androidImplementation.requestNotificationsPermission();
-      print("Android notification permissions granted: $granted");
-    }
-
     final settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
-
     print("Notification permissions granted: ${settings.authorizationStatus}");
-    if (settings.authorizationStatus != AuthorizationStatus.authorized) {
-      print("User denied notification permissions.");
-    }
   }
 
   Future<void> _setupFirebaseMessaging() async {
@@ -98,36 +84,44 @@ class NotificationadminController extends GetxController {
   }
 
   void _listenToOrderCollection() {
-    print("Listening to 'order' collection...");
+    final currentUserUid = _auth.currentUser?.uid;
 
-    if (_auth.currentUser?.uid != specialUid) {
-      print(
-          "Current user UID (${_auth.currentUser?.uid}) does not match special UID. Listener not started.");
+    if (currentUserUid == null) {
+      print("No logged-in user, Firestore listener not set.");
       return;
     }
 
+    print("Listening to Firestore orders...");
     _firestore.collection('order').snapshots().listen((querySnapshot) {
-      print(
-          "Order collection snapshot received with ${querySnapshot.docs.length} documents.");
       for (var change in querySnapshot.docChanges) {
         print("Change detected: ${change.doc.data()}");
-        if (change.type == DocumentChangeType.added) {
-          print("New order added: ${change.doc.data()}");
+        if (change.type == DocumentChangeType.added ||
+            change.type == DocumentChangeType.modified) {
           final data = change.doc.data();
           if (data != null) {
-            print("Preparing notification for data: $data");
-            _showNotification(
-              title: 'New Order Received!',
-              body:
-                  '${data['username']} placed a new order. Check it now!',
-              payload: {
-                'orderId': change.doc.id,
-                'status': data['status'] ?? 'No status',
-                'uid': data['uid'] ?? 'No UID',
-              },
-            );
-          } else {
-            print("Document data is null or invalid.");
+            if (currentUserUid == adminUid) {
+              // Notifikasi untuk admin
+              _showNotification(
+                title: 'New Order Received!',
+                body: '${data['username']} placed a new order. Check it now!',
+                payload: {
+                  'orderId': change.doc.id,
+                  'status': data['status'] ?? 'No status',
+                  'uid': data['uid'] ?? 'No UID',
+                },
+              );
+            } else if (currentUserUid == data['uid']) {
+              // Notifikasi untuk user
+              _showNotification(
+                title: 'Order Update',
+                body: 'Your order status: ${data['status']}',
+                payload: {
+                  'orderId': change.doc.id,
+                  'status': data['status'] ?? 'No status',
+                  'uid': data['uid'] ?? 'No UID',
+                },
+              );
+            }
           }
         }
       }
@@ -172,7 +166,6 @@ class NotificationadminController extends GetxController {
 
   void _handleNotificationTap(NotificationResponse response) {
     print("Notification tapped with payload: ${response.payload}");
-    // Tambahkan navigasi atau tindakan lain jika diperlukan
   }
 
   void _handleForegroundMessage(RemoteMessage message) {
